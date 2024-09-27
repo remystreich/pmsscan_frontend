@@ -1,0 +1,16 @@
+services:
+  frontend:
+    image: remystreich/pmscan-frontend:latest 
+    container_name: pmscan-frontend
+    ports:
+      - '80:80'  
+    networks:
+      - frontend-network
+    deploy:
+      resources:
+        limits:
+          memory: 256M 
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
