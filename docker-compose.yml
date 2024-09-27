@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - '5173:5173'
+    command: npm run dev -- --host 0.0.0.0
+    volumes:
+      - ./:/app       # Monter le code de l'hôte dans le conteneur
+      - /app/node_modules  # Evite de partager node_modules entre hôte et conteneur
+    environment:
+      - NODE_ENV=development
