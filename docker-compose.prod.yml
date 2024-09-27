@@ -3,7 +3,7 @@ services:
     image: remystreich/pmscan-frontend:latest 
     container_name: pmscan-frontend
     ports:
-      - '80:80'  
+      - '8080:80'  
     networks:
       - frontend-network
     deploy:
@@ -14,3 +14,7 @@ services:
         condition: on-failure
         delay: 5s
         max_attempts: 3
+
+
+networks:
+  frontend-network:
