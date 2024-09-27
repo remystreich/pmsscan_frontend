@@ -1,9 +1,12 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import Button from './Button';
 
-test('renders button with text', () => {
-  render(<Button />);
-  const buttonElement = screen.getByText(/click me/i);
-  expect(buttonElement).toBeInTheDocument();
+describe('Button', () => {
+  test('rend un bouton avec le texte "Click me"', () => {
+    render(<Button />);
+    const buttonElement = screen.getByRole('button', { name: /click me/i });
+    expect(buttonElement).toBeInTheDocument();
+  });
 });
