@@ -1,0 +1,29 @@
+# Étape 1 : Construction de l'application
+FROM node:20.17-alpine AS build
+
+# Définir le répertoire de travail
+WORKDIR /app
+
+# Copier les fichiers package.json et package-lock.json
+COPY package*.json ./
+
+# Installer les dépendances
+RUN npm install
+
+# Copier tout le projet dans le conteneur
+COPY . .
+
+# Build de production
+RUN npm run build
+
+# Étape 2 : Utiliser Nginx pour servir l'application
+FROM nginx:stable-alpine
+
+# Copier les fichiers de build de l'étape 1 vers le dossier HTML de Nginx
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Exposer le port 80 pour servir l'application
+EXPOSE 80
+
+# Démarrer Nginx
+CMD ["nginx", "-g", "daemon off;"]
