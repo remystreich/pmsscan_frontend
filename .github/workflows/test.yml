@@ -1,29 +1,60 @@
 name: Run Tests
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+   push:
+      branches:
+         - main
+   pull_request:
+      branches:
+         - main
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+   test:
+      runs-on: ubuntu-latest
+      permissions:
+         contents: write
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      steps:
+         - name: Checkout code
+           uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20.17'
+         - name: Set up Node.js
+           uses: actions/setup-node@v4
+           with:
+              node-version: '20.17'
 
-    - name: Install dependencies
-      run: npm install
+         - name: Install dependencies
+           run: npm install
 
-    - name: Run tests
-      run: npm run test
-      continue-on-error: false 
+         - name: Run tests with coverage
+           run: npm run test:coverage
+
+         - name: Deploy coverage report to GitHub Pages
+           uses: peaceiris/actions-gh-pages@v3
+           with:
+              github_token: ${{ secrets.GITHUB_TOKEN }}
+              publish_dir: ./coverage
+              force_orphan: true # Ceci force la réécriture de l'historique, gardant uniquement la dernière version
+              commit_message: 'docs(coverage): mise à jour du rapport de couverture'
+
+   codeql-analysis:
+      needs: test
+      runs-on: ubuntu-latest
+      permissions:
+         actions: read
+         contents: read
+         security-events: write
+
+      steps:
+         - name: Checkout code
+           uses: actions/checkout@v4
+
+         - name: Initialize CodeQL
+           uses: github/codeql-action/init@v3
+           with:
+              languages: 'javascript,typescript'
+
+         - name: Perform CodeQL Analysis
+           uses: github/codeql-action/analyze@v3
+           with:
+              output: sarif # génère un rapport au format SARIF pour GitHub Security
