@@ -14,7 +14,7 @@ export interface PMScanState {
 
 export const usePMScanStore = create<PMScanState>()(
    devtools(
-      (set, get, api: StoreApi<PMScanState>) => ({
+      (set, _get, api: StoreApi<PMScanState>) => ({
          manager: new PMScanManager(api),
          isConnected: false,
          measuresData: null,
