@@ -45,6 +45,7 @@ export const useRegister = () => {
          //    method: 'POST',
          //    body: JSON.stringify(data),
          // });
+         console.log('Form submitted:', data);
          console.log(API_URL);
       } catch (error) {
          console.error('Registration error:', error);
