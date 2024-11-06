@@ -27,7 +27,10 @@ const formSchema = z
 
 export type RegisterFormData = z.infer<typeof formSchema>;
 
-export const useRegister = () => {
+export const useRegister = (
+   onSuccess?: () => void,
+   onError?: (message: string) => void,
+) => {
    const form = useForm<RegisterFormData>({
       resolver: zodResolver(formSchema),
       defaultValues: {
@@ -40,15 +43,30 @@ export const useRegister = () => {
 
    const onSubmit = async (data: RegisterFormData) => {
       try {
-         // const response = await fetch(`${API_URL}/register`, {
-         //    method: 'POST',
-         //    body: JSON.stringify(data),
-         // });
-         console.log('onSubmit, data:', data);
-         console.log(API_URL);
+         const body = {
+            name: data.name,
+            email: data.email,
+            password: data.password,
+         };
+         const response = await fetch(`${API_URL}/auth/register`, {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+               Accept: 'application/json',
+            },
+            body: JSON.stringify(body),
+         });
+         if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Failed to register');
+         } else {
+            onSuccess?.();
+         }
       } catch (error) {
          console.error('Registration error:', error);
-         // Gérer les erreurs
+         onError?.(
+            error instanceof Error ? error.message : 'Failed to register',
+         );
       }
    };
 

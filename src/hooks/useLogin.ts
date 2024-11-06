@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { API_URL } from '@/utils/constants';
-
+import { useAuthStore } from '@/stores/authStore';
 const formSchema = z.object({
    email: z
       .string()
@@ -14,7 +14,11 @@ const formSchema = z.object({
 
 export type LoginFormData = z.infer<typeof formSchema>;
 
-export const useLogin = () => {
+export const useLogin = (
+   onSuccess?: () => void,
+   onError?: (message: string) => void,
+) => {
+   const { setAccessToken } = useAuthStore();
    const form = useForm<LoginFormData>({
       resolver: zodResolver(formSchema),
       defaultValues: {
@@ -25,14 +29,26 @@ export const useLogin = () => {
 
    const onSubmit = async (data: LoginFormData) => {
       try {
-         // Ici, vous pouvez ajouter votre logique d'API
-         console.log('Form submitted:', data);
          console.log(API_URL);
-         // Exemple:
-         // await loginUser(data);
+         const response = await fetch(`${API_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+               'Content-Type': 'application/json',
+               Accept: 'application/json',
+            },
+            body: JSON.stringify(data),
+         });
+         if (!response.ok) {
+            console.error('Login failed');
+            throw new Error('Failed to login');
+         } else {
+            const { access_token } = await response.json();
+            setAccessToken(access_token);
+            onSuccess?.();
+         }
       } catch (error) {
          console.error('Login error:', error);
-         // Gérer les erreurs
+         onError?.('Failed to login');
       }
    };
 

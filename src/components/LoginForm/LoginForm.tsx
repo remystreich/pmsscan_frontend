@@ -19,8 +19,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-export function LoginForm() {
-   const { form, onSubmit } = useLogin();
+type LoginFormProps = {
+   onLoginSuccess: () => void;
+   onLoginError: (message: string) => void;
+};
+
+export function LoginForm({ onLoginSuccess, onLoginError }: LoginFormProps) {
+   const { form, onSubmit } = useLogin(onLoginSuccess, onLoginError);
 
    return (
       <Card>
@@ -32,7 +37,11 @@ export function LoginForm() {
          </CardHeader>
          <CardContent>
             <Form {...form}>
-               <form noValidate className="space-y-8">
+               <form
+                  noValidate
+                  className="space-y-8"
+                  onSubmit={form.handleSubmit(onSubmit)}
+               >
                   <FormField
                      control={form.control}
                      name="email"
@@ -60,7 +69,6 @@ export function LoginForm() {
                            <FormLabel>Password</FormLabel>
                            <FormControl>
                               <Input
-                                 type="password"
                                  placeholder="Enter your password"
                                  {...field}
                               />

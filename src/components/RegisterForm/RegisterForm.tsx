@@ -21,8 +21,16 @@ import { useRegister } from '@/hooks/useRegister';
 import { Eye, EyeOff } from 'lucide-react';
 import { useState } from 'react';
 
-export function RegisterForm() {
-   const { form, onSubmit } = useRegister();
+type RegisterFormProps = {
+   onRegisterSuccess: () => void;
+   onRegisterError: (message: string) => void;
+};
+
+export function RegisterForm({
+   onRegisterSuccess,
+   onRegisterError,
+}: RegisterFormProps) {
+   const { form, onSubmit } = useRegister(onRegisterSuccess, onRegisterError);
    const [showPassword, setShowPassword] = useState(false);
    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 

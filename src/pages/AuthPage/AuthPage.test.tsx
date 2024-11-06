@@ -1,11 +1,19 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { describe, expect, it } from 'vitest';
+import { BrowserRouter } from 'react-router-dom';
 import AuthPage from './AuthPage';
+
+// Composant wrapper pour les tests
+const AuthPageWithRouter = () => (
+   <BrowserRouter>
+      <AuthPage />
+   </BrowserRouter>
+);
 
 describe('AuthPage', () => {
    it('renders register form', () => {
-      render(<AuthPage />);
+      render(<AuthPageWithRouter />);
       const registerForm = screen.getByText('Create an account');
       expect(registerForm).toBeDefined();
 
@@ -15,7 +23,7 @@ describe('AuthPage', () => {
    });
 
    it('renders login form', () => {
-      render(<AuthPage />);
+      render(<AuthPageWithRouter />);
       const loginForm = screen.getByText('Login');
       expect(loginForm).toBeDefined();
 
@@ -25,13 +33,13 @@ describe('AuthPage', () => {
    });
 
    it('should display the TERA logo', () => {
-      render(<AuthPage />);
+      render(<AuthPageWithRouter />);
       const logos = screen.getAllByAltText('TERA_logotype');
       expect(logos.length).toBeGreaterThan(0);
    });
 
    it('should display the belt photo on desktop view', () => {
-      render(<AuthPage />);
+      render(<AuthPageWithRouter />);
       const beltPhoto = screen.getByAltText('mscan_belt_photo');
       expect(beltPhoto).toBeDefined();
    });

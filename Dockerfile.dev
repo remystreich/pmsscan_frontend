@@ -1,6 +1,9 @@
 # Étape 1 : Utilisation d'une image de base node
 FROM node:20.17 AS development
 
+ARG VITE_API_URL
+ENV VITE_API_URL=http://localhost:3000/api
+
 # Étape 2 : Définir le répertoire de travail
 WORKDIR /app
 

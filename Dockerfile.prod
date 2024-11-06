@@ -1,6 +1,9 @@
 # Étape 1 : Construction de l'application
 FROM node:20.17-alpine AS build
 
+ARG VITE_API_URL
+ENV VITE_API_URL=https://remy-streich.ri7.tech/api
+
 # Définir le répertoire de travail
 WORKDIR /app
 
