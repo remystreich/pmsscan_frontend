@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const formSchema = z
    .object({
       name: z.string().min(3, 'Name must be at least 3 characters').max(255),
@@ -39,10 +41,11 @@ export const useRegister = () => {
 
    const onSubmit = async (data: RegisterFormData) => {
       try {
-         // Ici, vous pouvez ajouter votre logique d'API
-         console.log('Form submitted:', data);
-         // Exemple:
-         // await registerUser(data);
+         // const response = await fetch(`${API_URL}/register`, {
+         //    method: 'POST',
+         //    body: JSON.stringify(data),
+         // });
+         console.log(API_URL);
       } catch (error) {
          console.error('Registration error:', error);
          // Gérer les erreurs
