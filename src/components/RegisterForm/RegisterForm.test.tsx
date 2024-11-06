@@ -7,7 +7,7 @@ import React from 'react';
 
 describe('RegisterForm', () => {
    it('renders all form fields and submit button', () => {
-      render(<RegisterForm />);
+      render(<RegisterForm onRegisterSuccess={() => {}} onRegisterError={() => {}} />);
 
       // Vérifier la présence des champs par leur placeholder
       expect(screen.getByPlaceholderText('John Doe')).toBeInTheDocument();
@@ -30,7 +30,12 @@ describe('RegisterForm', () => {
    });
 
    it('toggles password visibility when eye icon is clicked', async () => {
-      render(<RegisterForm />);
+      render(
+         <RegisterForm
+            onRegisterSuccess={() => {}}
+            onRegisterError={() => {}}
+         />,
+      );
       const user = userEvent.setup();
 
       // Sélectionner le champ password par son placeholder
@@ -49,7 +54,12 @@ describe('RegisterForm', () => {
    });
 
    it('displays validation errors for invalid inputs', async () => {
-      render(<RegisterForm />);
+      render(
+         <RegisterForm
+            onRegisterSuccess={() => {}}
+            onRegisterError={() => {}}
+         />,
+      );
       const user = userEvent.setup();
 
       // Soumettre le formulaire vide
@@ -67,7 +77,12 @@ describe('RegisterForm', () => {
    });
 
    it('displays validation errors for passwords that do not match', async () => {
-      render(<RegisterForm />);
+      render(
+         <RegisterForm
+            onRegisterSuccess={() => {}}
+            onRegisterError={() => {}}
+         />,
+      );
       const user = userEvent.setup();
 
       // Remplir les champs

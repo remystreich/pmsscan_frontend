@@ -6,7 +6,7 @@ import React from 'react';
 
 describe('LoginForm', () => {
    it('renders all form fields and submit button', () => {
-      render(<LoginForm />);
+      render(<LoginForm onLoginSuccess={() => {}} onLoginError={() => {}} />);
 
       // Vérifier la présence des champs par leur placeholder
       expect(screen.getByPlaceholderText('Email')).toBeInTheDocument();
