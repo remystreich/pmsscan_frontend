@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 
-function Home(): React.JSX.Element {
+const Home = () => {
    const [count, setCount] = useState(0);
 
    return (
@@ -14,6 +14,6 @@ function Home(): React.JSX.Element {
          <p>{count}</p>
       </>
    );
-}
+};
 
 export default Home;
