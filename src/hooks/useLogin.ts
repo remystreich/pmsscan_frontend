@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { API_URL } from '@/utils/constants';
 
 const formSchema = z.object({
    email: z
@@ -26,6 +27,7 @@ export const useLogin = () => {
       try {
          // Ici, vous pouvez ajouter votre logique d'API
          console.log('Form submitted:', data);
+         console.log(API_URL);
          // Exemple:
          // await loginUser(data);
       } catch (error) {
