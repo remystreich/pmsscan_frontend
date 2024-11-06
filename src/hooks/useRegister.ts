@@ -1,8 +1,7 @@
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { API_URL } from '@/utils/constants';
 
 const formSchema = z
    .object({
