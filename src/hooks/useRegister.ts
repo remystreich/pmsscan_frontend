@@ -39,6 +39,7 @@ export const useRegister = (
          password: '',
          confirmPassword: '',
       },
+      mode: 'onChange',
    });
 
    const onSubmit = async (data: RegisterFormData) => {
