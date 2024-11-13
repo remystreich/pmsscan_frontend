@@ -24,7 +24,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const formSchema = z.object({
-   email: z.string().email('Adresse e-mail invalide'),
+   email: z.string().email('Invalid email address'),
 });
 
 interface ForgetPasswordFormProps {
@@ -57,7 +57,7 @@ const ForgetPasswordForm = ({
                body: JSON.stringify(values),
             },
          );
-         if (response.status !== 500) {
+         if (response.ok) {
             setSuccessMessage(
                <p>
                   If an account with this email exists, a reset link has been

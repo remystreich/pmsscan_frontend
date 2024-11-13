@@ -3,10 +3,15 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { LoginForm } from './LoginForm';
 import '@testing-library/jest-dom';
 import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 
 describe('LoginForm', () => {
    it('renders all form fields and submit button', () => {
-      render(<LoginForm onLoginSuccess={() => {}} onLoginError={() => {}} />);
+      render(
+         <MemoryRouter>
+            <LoginForm onLoginSuccess={() => {}} onLoginError={() => {}} />
+         </MemoryRouter>,
+      );
 
       // Vérifier la présence des champs par leur placeholder
       expect(screen.getByPlaceholderText('Email')).toBeInTheDocument();
@@ -45,10 +50,12 @@ describe('LoginForm', () => {
       });
 
       render(
-         <LoginForm
-            onLoginSuccess={mockOnLoginSuccess}
-            onLoginError={mockOnLoginError}
-         />,
+         <MemoryRouter>
+            <LoginForm
+               onLoginSuccess={mockOnLoginSuccess}
+               onLoginError={mockOnLoginError}
+            />
+         </MemoryRouter>,
       );
 
       fireEvent.change(screen.getByPlaceholderText('Email'), {
@@ -68,10 +75,12 @@ describe('LoginForm', () => {
       mockFetch.mockResolvedValueOnce({ ok: false });
 
       render(
-         <LoginForm
-            onLoginSuccess={mockOnLoginSuccess}
-            onLoginError={mockOnLoginError}
-         />,
+         <MemoryRouter>
+            <LoginForm
+               onLoginSuccess={mockOnLoginSuccess}
+               onLoginError={mockOnLoginError}
+            />
+         </MemoryRouter>,
       );
 
       fireEvent.change(screen.getByPlaceholderText('Email'), {
@@ -89,10 +98,12 @@ describe('LoginForm', () => {
 
    it('displays validation errors for empty fields', async () => {
       render(
-         <LoginForm
-            onLoginSuccess={mockOnLoginSuccess}
-            onLoginError={mockOnLoginError}
-         />,
+         <MemoryRouter>
+            <LoginForm
+               onLoginSuccess={mockOnLoginSuccess}
+               onLoginError={mockOnLoginError}
+            />
+         </MemoryRouter>,
       );
 
       fireEvent.click(screen.getByRole('button', { name: /login/i }));
