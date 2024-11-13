@@ -35,9 +35,7 @@ const ResetPasswordPage = () => {
          <AuthLayout>
             <div className="mt-8 text-center">
                <h2 className="text-2xl font-bold">
-                  {!resetToken
-                     ? 'Invalid reinitialization link'
-                     : 'Reinitialization link expired'}
+                  Invalid reinitialization link
                </h2>
                <p className="my-4 text-gray-600">
                   Make sure you are using the correct link or request a new one.
