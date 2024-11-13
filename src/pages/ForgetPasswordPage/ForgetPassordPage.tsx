@@ -1,7 +1,5 @@
 import InfoPopup from '@/components/InfoPopUp/InfoPopUp';
-import { Button } from '@/components/ui/button';
 import { useInfoPopup } from '@/hooks/useInfoPopUp';
-import { useNavigate } from 'react-router-dom';
 import AuthLayout from '@/layouts/AuthLayout';
 import ForgetPasswordForm from '@/components/ForgetPasswordForm/ForgetPasswordForm';
 
