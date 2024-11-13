@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 type LoginFormProps = {
    onLoginSuccess: () => void;
@@ -41,6 +42,7 @@ export function LoginForm({ onLoginSuccess, onLoginError }: LoginFormProps) {
                   noValidate
                   className="space-y-8"
                   onSubmit={form.handleSubmit(onSubmit)}
+                  data-testid="login-form"
                >
                   <FormField
                      control={form.control}
@@ -69,6 +71,7 @@ export function LoginForm({ onLoginSuccess, onLoginError }: LoginFormProps) {
                            <FormLabel>Password</FormLabel>
                            <FormControl>
                               <Input
+                                 type="password"
                                  placeholder="Enter your password"
                                  {...field}
                               />
@@ -82,10 +85,11 @@ export function LoginForm({ onLoginSuccess, onLoginError }: LoginFormProps) {
             </Form>
          </CardContent>
          <CardFooter className="flex flex-col items-center gap-6">
-            <p className="text-sm font-semibold underline">
-               Forgot your password?
-            </p>
-            {/* TODO: Add forgot password functionality && link to the forgot password page */}
+            <Link to="/forget-password">
+               <p className="text-sm font-semibold underline">
+                  Forgot your password?
+               </p>
+            </Link>
             <Button
                className="w-full"
                type="submit"

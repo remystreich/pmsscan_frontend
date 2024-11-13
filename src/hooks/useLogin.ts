@@ -25,11 +25,11 @@ export const useLogin = (
          email: '',
          password: '',
       },
+      mode: 'onChange',
    });
 
    const onSubmit = async (data: LoginFormData) => {
       try {
-         console.log(API_URL);
          const response = await fetch(`${API_URL}/auth/login`, {
             method: 'POST',
             headers: {

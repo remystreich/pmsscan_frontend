@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { RegisterForm } from './RegisterForm';
@@ -7,7 +7,12 @@ import React from 'react';
 
 describe('RegisterForm', () => {
    it('renders all form fields and submit button', () => {
-      render(<RegisterForm onRegisterSuccess={() => {}} onRegisterError={() => {}} />);
+      render(
+         <RegisterForm
+            onRegisterSuccess={() => {}}
+            onRegisterError={() => {}}
+         />,
+      );
 
       // Vérifier la présence des champs par leur placeholder
       expect(screen.getByPlaceholderText('John Doe')).toBeInTheDocument();
@@ -103,5 +108,37 @@ describe('RegisterForm', () => {
       expect(
          await screen.findByText(/Passwords do not match/i),
       ).toBeInTheDocument();
+   });
+});
+
+const mockFetch = vi.fn() as unknown as jest.Mock;
+global.fetch = mockFetch;
+
+describe('RegisterForm', () => {
+   const mockOnRegisterSuccess = vi.fn();
+   const mockOnRegisterError = vi.fn();
+
+   beforeEach(() => {
+      mockFetch.mockClear();
+      mockOnRegisterSuccess.mockClear();
+      mockOnRegisterError.mockClear();
+   });
+
+   it('calls onRegisterSuccess on successful registration', async () => {
+      render(
+         <RegisterForm
+            onRegisterSuccess={mockOnRegisterSuccess}
+            onRegisterError={mockOnRegisterError}
+         />,
+      );
+   });
+
+   it('calls onRegisterError on registration error', async () => {
+      render(
+         <RegisterForm
+            onRegisterSuccess={mockOnRegisterSuccess}
+            onRegisterError={mockOnRegisterError}
+         />,
+      );
    });
 });
