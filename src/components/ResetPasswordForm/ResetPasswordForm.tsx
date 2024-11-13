@@ -60,6 +60,7 @@ const ResetPasswordForm = ({
 
    const onSubmit = async (values: z.infer<typeof formSchema>) => {
       try {
+         console.log(resetToken);
          const response = await fetch(`${API_URL}/auth/reset-password`, {
             method: 'POST',
             headers: {
@@ -67,9 +68,10 @@ const ResetPasswordForm = ({
             },
             body: JSON.stringify({
                password: values.password,
-               token: resetToken,
+               token: JSON.stringify(resetToken),
             }),
          });
+         console.log(response);
 
          if (!response.ok) {
             const data = await response.json();
