@@ -1,0 +1,68 @@
+import InfoPopup from '@/components/InfoPopUp/InfoPopUp';
+import { useInfoPopup } from '@/hooks/useInfoPopUp';
+import AuthLayout from '@/layouts/AuthLayout';
+import ResetPasswordForm from '@/components/ResetPasswordForm/ResetPasswordForm';
+import { useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+
+const ResetPasswordPage = () => {
+   const { popupState, showPopup } = useInfoPopup();
+
+   const handleSuccess = (message: string) => {
+      showPopup('success', message);
+   };
+
+   const handleError = (message: string) => {
+      showPopup('error', message);
+   };
+
+   const [searchParams] = useSearchParams();
+   const resetToken = searchParams.get('token');
+
+   function isTokenExpired(token: string) {
+      try {
+         const { exp } = JSON.parse(atob(token.split('.')[1]));
+         const now = Date.now() / 1000;
+         return exp < now;
+      } catch (error) {
+         console.error('Error decoding token:', error);
+         return true;
+      }
+   }
+
+   if (!resetToken || isTokenExpired(resetToken)) {
+      return (
+         <AuthLayout>
+            <div className="mt-8 text-center">
+               <h2 className="text-2xl font-bold">
+                  {!resetToken
+                     ? 'Invalid reinitialization link'
+                     : 'Reinitialization link expired'}
+               </h2>
+               <p className="my-4 text-gray-600">
+                  Make sure you are using the correct link or request a new one.
+               </p>
+               <Link to="/">
+                  <p className="text-md font-semibold underline">Back</p>
+               </Link>
+            </div>
+         </AuthLayout>
+      );
+   }
+
+   return (
+      <AuthLayout>
+         <ResetPasswordForm
+            resetToken={resetToken}
+            onSuccess={handleSuccess}
+            onError={handleError}
+         />
+         <InfoPopup
+            message={popupState.message}
+            type={popupState.type}
+            isVisible={popupState.isVisible}
+         />
+      </AuthLayout>
+   );
+};
+export default ResetPasswordPage;

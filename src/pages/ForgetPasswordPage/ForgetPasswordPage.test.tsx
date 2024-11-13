@@ -1,20 +1,21 @@
+import React from 'react';
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import ForgetPasswordPage from '@/pages/ForgetPasswordPage/ForgetPassordPage';
+import ForgetPasswordPage from './ForgetPassordPage';
 import '@testing-library/jest-dom';
-import { MemoryRouter } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 
 describe('ForgetPasswordPage', () => {
    it('renders all form fields and submit button', () => {
       render(
-         <MemoryRouter>
+         <BrowserRouter>
             <ForgetPasswordPage />
-         </MemoryRouter>,
+         </BrowserRouter>,
       );
 
       // Vérifier la présence des champs par leur placeholder
       expect(
-         screen.getByPlaceholderText('Enter your email'),
+         screen.getByPlaceholderText('email@exemple.com'),
       ).toBeInTheDocument();
 
       // Vérifier la présence des labels
@@ -22,7 +23,7 @@ describe('ForgetPasswordPage', () => {
 
       // Vérifier le bouton submit
       expect(
-         screen.getByRole('button', { name: /reset password/i }),
+         screen.getByRole('button', { name: /send reset link/i }),
       ).toBeInTheDocument();
    });
 });
