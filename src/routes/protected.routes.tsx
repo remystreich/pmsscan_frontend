@@ -1,8 +1,14 @@
 import ProtectedLayout from '@/layouts/ProtectedLayout';
 import { RouteObject } from 'react-router-dom';
 import Home from '@/pages/Home/Home';
+import { House, LucideIcon } from 'lucide-react';
 
-export const protectedRoutes: RouteObject[] = [
+interface CustomRouteObject extends Omit<RouteObject, 'children'> {
+   icon?: LucideIcon;
+   children?: CustomRouteObject[];
+}
+
+export const protectedRoutes: CustomRouteObject[] = [
    {
       path: '/',
       element: <ProtectedLayout />,
@@ -10,8 +16,12 @@ export const protectedRoutes: RouteObject[] = [
          {
             path: 'home',
             element: <Home />,
+            icon: House,
          },
-         // Ajoutez d'autres routes protégées ici
+         {
+            path: 'hometest',
+            element: <Home />,
+         },
       ],
    },
 ];

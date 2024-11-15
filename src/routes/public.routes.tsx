@@ -1,4 +1,3 @@
-import Home from '@/pages/Home/Home';
 import AuthPage from '@/pages/AuthPage/AuthPage';
 import ForgetPasswordPage from '@/pages/ForgetPasswordPage/ForgetPassordPage';
 import { RouteObject } from 'react-router-dom';

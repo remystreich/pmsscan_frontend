@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { API_URL } from '@/utils/constants';
 import { useAuthStore } from '@/stores/authStore';
+
 const formSchema = z.object({
    email: z
       .string()
@@ -36,6 +37,7 @@ export const useLogin = (
                'Content-Type': 'application/json',
                Accept: 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify(data),
          });
          if (!response.ok) {

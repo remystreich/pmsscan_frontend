@@ -6,8 +6,11 @@ const Home = () => {
 
    return (
       <>
-         <div className="card">
-            <Button variant="default" onClick={() => setCount((count) => count + 1)}>
+         <div className="card mt-64">
+            <Button
+               variant="default"
+               onClick={() => setCount((count) => count + 1)}
+            >
                count is {count}
             </Button>
          </div>
