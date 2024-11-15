@@ -11,10 +11,6 @@ export const publicRoutes: RouteObject[] = [
       children: [],
    },
    {
-      path: '/home',
-      element: <Home />,
-   },
-   {
       path: '/forget-password',
       element: <ForgetPasswordPage />,
    },
