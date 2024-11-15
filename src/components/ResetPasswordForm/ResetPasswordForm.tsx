@@ -67,7 +67,7 @@ const ResetPasswordForm = ({
             },
             body: JSON.stringify({
                password: values.password,
-               token: resetToken,
+               resetToken: resetToken,
             }),
          });
 
@@ -78,8 +78,8 @@ const ResetPasswordForm = ({
          }
 
          onSuccess('Password reset successfully');
+         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-         console.error('Error resetting password:', error);
          onError('An error occurred. Please try again later.');
       }
    };

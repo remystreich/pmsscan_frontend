@@ -4,12 +4,15 @@ import AuthLayout from '@/layouts/AuthLayout';
 import ResetPasswordForm from '@/components/ResetPasswordForm/ResetPasswordForm';
 import { useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const ResetPasswordPage = () => {
    const { popupState, showPopup } = useInfoPopup();
+   const navigate = useNavigate();
 
    const handleSuccess = (message: string) => {
       showPopup('success', message);
+      navigate('/');
    };
 
    const handleError = (message: string) => {
