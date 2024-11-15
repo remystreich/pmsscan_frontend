@@ -60,7 +60,6 @@ const ResetPasswordForm = ({
 
    const onSubmit = async (values: z.infer<typeof formSchema>) => {
       try {
-         console.log(resetToken);
          const response = await fetch(`${API_URL}/auth/reset-password`, {
             method: 'POST',
             headers: {
@@ -68,10 +67,9 @@ const ResetPasswordForm = ({
             },
             body: JSON.stringify({
                password: values.password,
-               token: JSON.stringify(resetToken),
+               resetToken: resetToken,
             }),
          });
-         console.log(response);
 
          if (!response.ok) {
             const data = await response.json();
@@ -80,8 +78,8 @@ const ResetPasswordForm = ({
          }
 
          onSuccess('Password reset successfully');
+         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-         console.error('Error resetting password:', error);
          onError('An error occurred. Please try again later.');
       }
    };
