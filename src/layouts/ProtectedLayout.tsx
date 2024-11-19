@@ -1,7 +1,15 @@
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '@/components/Sidebar/Sidebar';
+import { useAuthStore } from '@/stores/authStore';
 
 const ProtectedLayout = () => {
+   const { getAccessToken } = useAuthStore();
+   const location = useLocation();
+
+   if (!getAccessToken()) {
+      return <Navigate to="/" state={{ from: location }} replace />;
+   }
+
    return (
       <div className="flex h-screen">
          <Sidebar />
