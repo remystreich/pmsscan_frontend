@@ -1,11 +1,20 @@
 import TERA_logotype from '@/assets/TERA_logotype.webp';
 import pmscan_belt_photo from '@/assets/pmscan_belt_photo.webp';
+import { useAuthStore } from '@/stores/authStore';
+import { Navigate, useLocation } from 'react-router-dom';
 
 type AuthLayoutProps = {
    children: React.ReactNode;
 };
 
 const AuthLayout = ({ children }: AuthLayoutProps) => {
+   const { getAccessToken } = useAuthStore();
+   const location = useLocation();
+
+   if (getAccessToken()) {
+      return <Navigate to="/home" state={{ from: location }} replace />;
+   }
+
    return (
       <main className="grid grid-cols-1 items-center justify-center lg:h-screen lg:grid-cols-2">
          <div className="m-10 lg:hidden">
