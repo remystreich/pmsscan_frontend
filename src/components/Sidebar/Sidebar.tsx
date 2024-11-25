@@ -10,6 +10,7 @@ import InfoPopup from '../InfoPopUp/InfoPopUp';
 
 const Sidebar = () => {
    const [isOpen, setIsOpen] = useState(false);
+
    const { popupState, showPopup } = useInfoPopup();
 
    const toggleSidebar = () => {

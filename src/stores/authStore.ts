@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 type AuthStore = {
    accessToken: string | null;
@@ -6,8 +7,15 @@ type AuthStore = {
    getAccessToken: () => string | null;
 };
 
-export const useAuthStore = create<AuthStore>((set, get) => ({
-   accessToken: null,
-   setAccessToken: (token) => set({ accessToken: token }),
-   getAccessToken: () => get().accessToken,
-}));
+export const useAuthStore = create<AuthStore>()(
+   persist(
+      (set, get) => ({
+         accessToken: null,
+         setAccessToken: (token) => set({ accessToken: token }),
+         getAccessToken: () => get().accessToken,
+      }),
+      {
+         name: 'auth-storage',
+      },
+   ),
+);

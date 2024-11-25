@@ -18,10 +18,6 @@ export const protectedRoutes: CustomRouteObject[] = [
             element: <Home />,
             icon: House,
          },
-         {
-            path: 'hometest',
-            element: <Home />,
-         },
       ],
    },
 ];
