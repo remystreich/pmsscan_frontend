@@ -1,11 +1,13 @@
 import { API_URL } from '@/utils/constants';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuthStore } from '@/stores/authStore';
 
 const useLogout = () => {
    const [loading, setLoading] = useState(false);
    const [error, setError] = useState<string | null>(null);
    const navigate = useNavigate();
+   const { setAccessToken } = useAuthStore();
 
    const logout = async () => {
       setLoading(true);
@@ -20,6 +22,7 @@ const useLogout = () => {
             credentials: 'include',
          });
          if (response.status === 200) {
+            setAccessToken(null);
             navigate('/');
          } else {
             setError('An error occurred');
