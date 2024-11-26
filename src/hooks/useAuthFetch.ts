@@ -9,20 +9,21 @@ export const useAuthFetch = () => {
    const navigate = useNavigate();
 
    const authFetch = useCallback(
-      async (url: string, options: RequestInit = {}) => {
+      async (url: string, options: RequestInit = {}, method: string) => {
+         const accessToken = getAccessToken();
          // Ajout du token aux headers
          const headers = {
             ...options.headers,
             'Content-Type': 'application/json',
-            ...(getAccessToken() && {
-               Authorization: `Bearer ${getAccessToken()}`,
-            }),
+            accept: 'application/json',
+            Authorization: `Bearer ${accessToken}`,
          };
 
-         const response = await fetch(url, {
+         const response = await fetch(API_URL + url, {
             ...options,
             credentials: 'include',
             headers,
+            method: method,
          });
 
          // Si 401, on tente de refresh
@@ -37,13 +38,14 @@ export const useAuthFetch = () => {
                setAccessToken(access_token);
 
                // On retente la requête originale avec le nouveau token
-               return fetch(url, {
+               return fetch(API_URL + url, {
                   ...options,
                   credentials: 'include',
                   headers: {
                      ...headers,
                      Authorization: `Bearer ${access_token}`,
                   },
+                  method: method,
                });
             } else {
                // Si le refresh échoue, on déconnecte

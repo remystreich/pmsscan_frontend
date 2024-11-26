@@ -46,20 +46,22 @@ const Header = () => {
                )}
             </div>
          </div>
-         <div className="mb-2 mt-5 flex items-center justify-around">
-            <div className="flex min-w-20 flex-col items-center justify-center gap-2 rounded-md border border-solid border-emerald-600 px-2 py-1">
-               <p className="font-bold text-primary">PM 1</p>
-               <p>10</p>
+         {isConnected ? (
+            <div className="mb-2 mt-5 flex items-center justify-around">
+               <div className="flex min-w-20 flex-col items-center justify-center gap-2 rounded-md border border-solid border-emerald-600 px-2 py-1">
+                  <p className="font-bold text-primary">PM 1</p>
+                  <p>10</p>
+               </div>
+               <div className="flex min-w-20 flex-col items-center justify-center gap-2 rounded-md border border-solid border-emerald-600 px-2 py-1">
+                  <p className="font-bold text-primary">PM 2.5</p>
+                  <p>10</p>
+               </div>
+               <div className="flex min-w-20 flex-col items-center justify-center gap-2 rounded-md border border-solid border-emerald-600 px-2 py-1">
+                  <p className="font-bold text-primary">PM 10</p>
+                  <p>10</p>
+               </div>
             </div>
-            <div className="flex min-w-20 flex-col items-center justify-center gap-2 rounded-md border border-solid border-emerald-600 px-2 py-1">
-               <p className="font-bold text-primary">PM 2.5</p>
-               <p>10</p>
-            </div>
-            <div className="flex min-w-20 flex-col items-center justify-center gap-2 rounded-md border border-solid border-emerald-600 px-2 py-1">
-               <p className="font-bold text-primary">PM 10</p>
-               <p>10</p>
-            </div>
-         </div>
+         ) : null}
       </header>
    );
 };

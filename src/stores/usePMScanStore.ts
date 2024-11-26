@@ -1,15 +1,28 @@
 import { create, StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { PMScanManager } from '../services/PMScanManager';
-import { MeasuresData, PMScanObjType } from '../types/types';
+import { MeasuresData, PMScanObjType, Info } from '../types/types';
+
+export interface PMScan {
+   id: string;
+   createdAt: string;
+   updatedAt: string;
+   name: string;
+   deviceId: string;
+   deviceName: string;
+   display: Uint8Array;
+   // Ajoutez d'autres propriétés nécessaires
+}
 
 export interface PMScanState {
    manager: PMScanManager;
    isConnected: boolean;
    measuresData: MeasuresData | null;
    PMScanObj: PMScanObjType;
+   info: Info | null;
    connect: () => void;
    disconnect: () => void;
+   setInfo: (info: Info | null) => void;
 }
 
 export const usePMScanStore = create<PMScanState>()(
@@ -29,31 +42,19 @@ export const usePMScanStore = create<PMScanState>()(
             dataLogger: false,
             externalMemory: 0,
          },
+         info: null,
 
          connect: () => {
             const { manager } = usePMScanStore.getState();
             manager.requestDevice();
-            set({ isConnected: true });
-
-            manager.handleRTData = (value: DataView) => {
-               const rawData = new Uint8Array(value.buffer);
-               const measuresData = {
-                  pm1gm: (((rawData[9] & 0xff) << 8) | (rawData[8] & 0xff)) / 10,
-                  pm10gm: (((rawData[13] & 0xff) << 8) | (rawData[12] & 0xff)) / 10,
-                  pm25gm: (((rawData[11] & 0xff) << 8) | (rawData[10] & 0xff)) / 10,
-                  temp: ((rawData[15] & 0xff) << 8) | (rawData[14] & 0xff),
-                  hum: ((rawData[17] & 0xff) << 8) | (rawData[16] & 0xff),
-               };
-
-               set({ measuresData });
-            };
          },
 
          disconnect: () => {
             const { manager } = usePMScanStore.getState();
             manager.disconnectDevice();
-            set({ isConnected: false });
          },
+
+         setInfo: (info: Info | null) => set({ info }),
       }),
       {
          name: 'PMScan Store',
