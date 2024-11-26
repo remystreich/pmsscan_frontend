@@ -10,8 +10,20 @@ export const useAuthFetch = () => {
 
    const authFetch = useCallback(
       async (url: string, options: RequestInit = {}, method: string) => {
-         const accessToken = getAccessToken();
-         // Ajout du token aux headers
+         // Attendre un court instant si le token n'est pas disponible
+         let retries = 3;
+         let accessToken = getAccessToken();
+
+         while (!accessToken && retries > 0) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            accessToken = getAccessToken();
+            retries--;
+         }
+
+         if (!accessToken) {
+            throw new Error('No access token available');
+         }
+
          const headers = {
             ...options.headers,
             'Content-Type': 'application/json',
