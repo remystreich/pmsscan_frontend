@@ -435,7 +435,7 @@ export class PMScanManager {
             hum: ((rawData[17] & 0xff) << 8) | (rawData[16] & 0xff),
          };
 
-         // console.log('Measures Data:', measuresData);
+         console.log('Measures Data:', measuresData);
       }
    }
 
@@ -453,7 +453,7 @@ export class PMScanManager {
             hum: ((rawData[17] & 0xff) << 8) | (rawData[16] & 0xff),
          };
 
-         // console.log('Measures Data:', measuresData);
+         console.log('Measures Data:', measuresData);
       }
    }
 
