@@ -1,7 +1,8 @@
 import ProtectedLayout from '@/layouts/ProtectedLayout';
 import { RouteObject } from 'react-router-dom';
 import Home from '@/pages/Home/Home';
-import { House, LucideIcon } from 'lucide-react';
+import RecordsPage from '@/pages/Records/RecordsPage';
+import { House, LucideIcon, Clipboard } from 'lucide-react';
 
 interface CustomRouteObject extends Omit<RouteObject, 'children'> {
    icon?: LucideIcon;
@@ -17,6 +18,11 @@ export const protectedRoutes: CustomRouteObject[] = [
             path: 'home',
             element: <Home />,
             icon: House,
+         },
+         {
+            path: 'records',
+            element: <RecordsPage />,
+            icon: Clipboard,
          },
       ],
    },

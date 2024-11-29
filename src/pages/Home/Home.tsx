@@ -1,20 +1,24 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { usePMScanListFetch } from '@/hooks/usePMScanListFetch';
 
 const Home = () => {
-   const [count, setCount] = useState(0);
+   const { pmscans, isLoading, error } = usePMScanListFetch();
+
+   if (isLoading) {
+      return <div>Chargement...</div>;
+   }
+
+   if (error) {
+      return <div>Erreur: {error}</div>;
+   }
 
    return (
       <>
          <div className="card mt-64">
-            <Button
-               variant="default"
-               onClick={() => setCount((count) => count + 1)}
-            >
-               count is {count}
-            </Button>
+            <h1>Home</h1>
+            {pmscans.map((pmscan) => {
+               return <div key={pmscan.id}>{pmscan.deviceName}</div>;
+            })}
          </div>
-         <p>{count}</p>
       </>
    );
 };
