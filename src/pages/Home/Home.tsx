@@ -16,7 +16,7 @@ const Home = () => {
          <div className="card mt-64">
             <h1>Home</h1>
             {pmscans.map((pmscan) => {
-               return <div key={pmscan.deviceId}>{pmscan.deviceName}</div>;
+               return <div key={pmscan.id}>{pmscan.deviceName}</div>;
             })}
          </div>
       </>

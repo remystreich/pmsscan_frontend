@@ -22,7 +22,6 @@ const useRefreshToken = () => {
             console.error('Échec du rafraîchissement du jeton');
             setAccessToken(null);
             navigate('/');
-            console.error('Échec du rafraîchissement du jeton');
          }
       } catch (error) {
          console.error('Erreur lors du rafraîchissement du jeton:', error);

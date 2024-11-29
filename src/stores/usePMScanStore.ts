@@ -1,7 +1,7 @@
 import { create, StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { PMScanManager } from '../services/PMScanManager';
-import { MeasuresData, PMScanObjType, Info } from '../types/types';
+import { MeasuresData, PMScanObjType, Info, PMScanMode } from '../types/types';
 
 export interface PMScan {
    id: string;
@@ -11,7 +11,6 @@ export interface PMScan {
    deviceId: string;
    deviceName: string;
    display: Uint8Array;
-   // Ajoutez d'autres propriétés nécessaires
 }
 
 export interface PMScanState {
@@ -20,9 +19,16 @@ export interface PMScanState {
    measuresData: MeasuresData | null;
    PMScanObj: PMScanObjType;
    info: Info | null;
+   pmscans: PMScan[];
+   isLoading: boolean;
+   error: string | null;
+   mode: PMScanMode;
    connect: () => void;
    disconnect: () => void;
    setInfo: (info: Info | null) => void;
+   setPMScans: (pmscans: PMScan[]) => void;
+   setIsLoading: (isLoading: boolean) => void;
+   setError: (error: string | null) => void;
 }
 
 export const usePMScanStore = create<PMScanState>()(
@@ -33,16 +39,30 @@ export const usePMScanStore = create<PMScanState>()(
          measuresData: null,
          PMScanObj: {
             name: '',
+            deviceName: '',
             version: 0,
             mode: 0,
             interval: 0,
             display: new Uint8Array(),
             battery: 0,
             charging: 0,
-            dataLogger: false,
-            externalMemory: 0,
+            isRecording: false,
+            externalMemory: false,
          },
          info: null,
+         pmscans: [],
+         isLoading: false,
+         error: null,
+         mode: {
+            acquisitionStarted: false,
+            disconnectRequested: false,
+            factoryResetRequested: false,
+            lowPowerModeEnabled: false,
+            memoryDownloadRequested: false,
+            memoryEmpty: false,
+            memoryEraseRequested: false,
+            memoryFull: false,
+         },
 
          connect: () => {
             const { manager } = usePMScanStore.getState();
@@ -55,6 +75,10 @@ export const usePMScanStore = create<PMScanState>()(
          },
 
          setInfo: (info: Info | null) => set({ info }),
+
+         setPMScans: (pmscans) => set({ pmscans }),
+         setIsLoading: (isLoading) => set({ isLoading }),
+         setError: (error) => set({ error }),
       }),
       {
          name: 'PMScan Store',
