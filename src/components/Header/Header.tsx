@@ -1,19 +1,28 @@
 import { Button } from '@/components/ui/button';
 import { usePMScanStore } from '@/stores/usePMScanStore';
-
+import { useInfoPopup } from '@/hooks/useInfoPopUp';
 import { BatteryCharging, BatteryFull, BatteryLow, BatteryMedium, BatteryWarning, HardDrive, Wifi } from 'lucide-react';
+import { useEffect } from 'react';
+import InfoPopup from '@/components/InfoPopUp/InfoPopUp';
 
 const Header = () => {
    const measuresData = usePMScanStore((state) => state.measuresData);
-   const { isConnected, connect, disconnect, PMScanObj, mode } = usePMScanStore();
+   const { isConnected, connect, disconnect, PMScanObj, mode, info } = usePMScanStore();
+   const { showPopup, popupState } = useInfoPopup();
 
-   const handleButtonClick = () => {
+   const handleButtonClick = async () => {
       if (isConnected) {
          disconnect();
       } else {
          connect();
       }
    };
+
+   useEffect(() => {
+      if (info) {
+         showPopup(info.type, info.message);
+      }
+   }, [info, showPopup]);
 
    const batteryState = () => {
       if (PMScanObj.charging === 0) {
@@ -198,6 +207,7 @@ const Header = () => {
                </div>
             </div>
          ) : null}
+         <InfoPopup message={popupState.message} type={popupState.type} isVisible={popupState.isVisible} />
       </header>
    );
 };

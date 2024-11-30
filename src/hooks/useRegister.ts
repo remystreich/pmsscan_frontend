@@ -42,7 +42,6 @@ export const useRegister = (onSuccess?: () => void, onError?: (message: string) 
             email: data.email,
             password: data.password,
          };
-         console.log(API_URL);
          const response = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: {
