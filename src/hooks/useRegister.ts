@@ -6,11 +6,7 @@ import { API_URL } from '@/utils/constants';
 const formSchema = z
    .object({
       name: z.string().min(3, 'Name must be at least 3 characters').max(255),
-      email: z
-         .string()
-         .email('Invalid email')
-         .min(1, 'Email is required')
-         .max(255),
+      email: z.string().email('Invalid email').min(1, 'Email is required').max(255),
       password: z
          .string()
          .min(8, 'Password must be at least 8 characters')
@@ -27,10 +23,7 @@ const formSchema = z
 
 export type RegisterFormData = z.infer<typeof formSchema>;
 
-export const useRegister = (
-   onSuccess?: () => void,
-   onError?: (message: string) => void,
-) => {
+export const useRegister = (onSuccess?: () => void, onError?: (message: string) => void) => {
    const form = useForm<RegisterFormData>({
       resolver: zodResolver(formSchema),
       defaultValues: {
@@ -49,6 +42,7 @@ export const useRegister = (
             email: data.email,
             password: data.password,
          };
+         console.log(API_URL);
          const response = await fetch(`${API_URL}/auth/register`, {
             method: 'POST',
             headers: {
@@ -65,9 +59,7 @@ export const useRegister = (
          }
       } catch (error) {
          console.error('Registration error:', error);
-         onError?.(
-            error instanceof Error ? error.message : 'Failed to register',
-         );
+         onError?.(error instanceof Error ? error.message : 'Failed to register');
       }
    };
 

@@ -34,3 +34,13 @@ export interface PMScanMode {
    memoryEraseRequested: boolean;
    memoryFull: boolean;
 }
+
+export interface PMScan {
+   createdAt: string;
+   deviceName: string;
+   display: Uint8Array;
+   id: number;
+   name: string;
+   updatedAt: string;
+   userId?: number;
+}

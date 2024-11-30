@@ -1,17 +1,7 @@
 import { create, StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { PMScanManager } from '../services/PMScanManager';
-import { MeasuresData, PMScanObjType, Info, PMScanMode } from '../types/types';
-
-export interface PMScan {
-   id: string;
-   createdAt: string;
-   updatedAt: string;
-   name: string;
-   deviceId: string;
-   deviceName: string;
-   display: Uint8Array;
-}
+import { MeasuresData, PMScanObjType, Info, PMScanMode, PMScan } from '../types/types';
 
 export interface PMScanState {
    manager: PMScanManager;
