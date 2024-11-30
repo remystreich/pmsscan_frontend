@@ -6,8 +6,7 @@ import { usePMScanStore } from '@/stores/usePMScanStore';
 export const usePMScanListFetch = () => {
    const { authFetch } = useAuthFetch();
    const accessToken = useAuthStore((state) => state.accessToken);
-   const { pmscans, setPMScans, isLoading, setIsLoading, error, setError } =
-      usePMScanStore();
+   const { pmscans, setPMScans, isLoading, setIsLoading, error, setError } = usePMScanStore();
 
    useEffect(() => {
       let isMounted = true;
@@ -29,10 +28,7 @@ export const usePMScanListFetch = () => {
                }
             } catch (error) {
                if (isMounted) {
-                  console.error(
-                     'Erreur lors de la récupération des PMScans:',
-                     error,
-                  );
+                  console.error('Erreur lors de la récupération des PMScans:', error);
                   setError('Erreur lors de la récupération des PMScans');
                }
             } finally {

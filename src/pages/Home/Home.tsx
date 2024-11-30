@@ -1,4 +1,6 @@
 import { usePMScanListFetch } from '@/hooks/usePMScanListFetch';
+import PMScanCard from '@/components/PMScanCard/PMScanCard';
+import { PMScan } from '@/types/types';
 
 const Home = () => {
    const { pmscans, isLoading, error } = usePMScanListFetch();
@@ -13,12 +15,11 @@ const Home = () => {
 
    return (
       <>
-         <div className="card mt-64">
-            <h1>Home</h1>
-            {pmscans.map((pmscan) => {
-               return <div key={pmscan.id}>{pmscan.deviceName}</div>;
-            })}
-         </div>
+         <main className="grid grid-cols-1 p-2 lg:grid-cols-2 lg:p-4">
+            {pmscans.map((pmscan: PMScan) => (
+               <PMScanCard key={pmscan.id} pmscan={pmscan} />
+            ))}
+         </main>
       </>
    );
 };
