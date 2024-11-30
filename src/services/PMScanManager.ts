@@ -83,6 +83,11 @@ export class PMScanManager {
    }
 
    async requestDevice(): Promise<void> {
+      const available = await navigator.bluetooth.getAvailability();
+      if (!available) {
+         this.setInfo({ message: 'Bluetooth is not available on this navigator', type: 'error' });
+         return;
+      }
       try {
          this.device = await navigator.bluetooth.requestDevice({
             filters: [{ namePrefix: 'PMScan' }],
@@ -90,12 +95,13 @@ export class PMScanManager {
          });
 
          if (this.device) {
-            this.gatt = this.device.gatt || null;
+            this.gatt = this.device.gatt as BluetoothRemoteGATTServer;
             this.device.addEventListener('gattserverdisconnected', this.onDisconnected.bind(this));
             this.shouldConnect = true;
             this.connect();
          }
       } catch (error) {
+         console.error(error);
          this.setInfo({
             message: 'Bluetooth device request failed',
             type: 'error',
@@ -164,6 +170,10 @@ export class PMScanManager {
          this.registerPMScan();
       } catch (error) {
          this.disconnectDevice();
+         this.setInfo({
+            message: 'Error initializing PMScan connection',
+            type: 'error',
+         });
          console.error(error, 'onPMScanConnected');
       }
    }
@@ -179,12 +189,15 @@ export class PMScanManager {
                this.updateDisplayCharacteristic(existingPMScan.display);
             } else if (!existingPMScan) {
                this.updatePMScanObj({ name: this.PMScanObj.deviceName });
-               const body = {
+               const payload = {
                   name: this.PMScanObj.deviceName,
                   deviceName: this.PMScanObj.deviceName,
                   display: this.uint8ArrayToBase64(this.PMScanObj.display),
                };
                const accessToken = this.getAccessToken();
+               if (!accessToken) {
+                  throw new Error('No access token available');
+               }
                const response = await fetch(`${API_URL}/pmscan`, {
                   method: 'POST',
                   headers: {
@@ -193,8 +206,12 @@ export class PMScanManager {
                      Authorization: `Bearer ${accessToken}`,
                   },
                   credentials: 'include',
-                  body: JSON.stringify(body),
+                  body: JSON.stringify(payload),
                });
+               if (!response.ok) {
+                  const errorData = await response.json();
+                  throw new Error(`API error: ${JSON.stringify(errorData)}`);
+               }
                const data = await response.json();
                if (data.display && data.display.type === 'Buffer') {
                   data.display = new Uint8Array(data.display.data);

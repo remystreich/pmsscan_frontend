@@ -13,9 +13,14 @@ const Home = () => {
       return <div>Erreur: {error}</div>;
    }
 
+   if (!Array.isArray(pmscans)) {
+      console.error("pmscans n'est pas un tableau:", pmscans);
+      return <div>Erreur: Format de données incorrect</div>;
+   }
+
    return (
       <>
-         <main className="grid grid-cols-1 p-2 lg:grid-cols-2 lg:p-4">
+         <main className="grid grid-cols-1 gap-2 p-2 lg:grid-cols-2 lg:p-4">
             {pmscans.map((pmscan: PMScan) => (
                <PMScanCard key={pmscan.id} pmscan={pmscan} />
             ))}
