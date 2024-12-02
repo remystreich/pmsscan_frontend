@@ -6,7 +6,6 @@ const useDeletePMScan = () => {
    const { authFetch } = useAuthFetch();
    const { setPMScans, pmscans, disconnect } = usePMScanStore();
 
-   // Utiliser useCallback pour mémoriser la fonction
    const deletePMScan = useCallback(
       async (id: number) => {
          try {

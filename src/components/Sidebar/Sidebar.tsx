@@ -61,6 +61,7 @@ const Sidebar = () => {
                               <Link
                                  to={`/${childRoute.path}`}
                                  className="flex items-center gap-2 rounded-md p-2.5 text-card-foreground no-underline transition-all hover:bg-secondary"
+                                 onClick={toggleSidebar}
                               >
                                  {Icon && <Icon size={20} />}
                                  <span className="capitalize">{childRoute.path}</span>

@@ -1,19 +1,5 @@
-import {
-   Card,
-   CardContent,
-   CardDescription,
-   CardHeader,
-   CardTitle,
-} from '@/components/ui/card';
-import {
-   Form,
-   FormControl,
-   FormField,
-   FormItem,
-   FormLabel,
-   FormMessage,
-   FormDescription,
-} from '@/components/ui/form';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
@@ -45,11 +31,7 @@ interface ResetPasswordFormProps {
    onError: (message: string) => void;
 }
 
-const ResetPasswordForm = ({
-   resetToken,
-   onSuccess,
-   onError,
-}: ResetPasswordFormProps) => {
+const ResetPasswordForm = ({ resetToken, onSuccess, onError }: ResetPasswordFormProps) => {
    const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
       defaultValues: { password: '', confirmPassword: '' },
@@ -92,11 +74,7 @@ const ResetPasswordForm = ({
          </CardHeader>
          <CardContent>
             <Form {...form}>
-               <form
-                  noValidate
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-8"
-               >
+               <form noValidate onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
                   <FormField
                      control={form.control}
                      name="password"
@@ -105,16 +83,10 @@ const ResetPasswordForm = ({
                            <FormLabel>Password</FormLabel>
                            <FormControl>
                               <div className="relative">
-                                 <Input
-                                    type={showPassword ? 'text' : 'password'}
-                                    placeholder="Your password"
-                                    {...field}
-                                 />
+                                 <Input type={showPassword ? 'text' : 'password'} placeholder="Your password" {...field} />
                                  <button
                                     type="button"
-                                    onClick={() =>
-                                       setShowPassword(!showPassword)
-                                    }
+                                    onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2"
                                  >
                                     {showPassword ? (
@@ -126,9 +98,8 @@ const ResetPasswordForm = ({
                               </div>
                            </FormControl>
                            <FormDescription>
-                              Password must contain at least 8 characters, 1
-                              uppercase letter, 1 lowercase letter, 1 number and
-                              1 special character
+                              Password must contain at least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number and 1
+                              special character
                            </FormDescription>
                            <FormMessage />
                         </FormItem>
@@ -142,16 +113,10 @@ const ResetPasswordForm = ({
                            <FormLabel>Confirm Password</FormLabel>
                            <FormControl>
                               <div className="relative">
-                                 <Input
-                                    type={showPassword ? 'text' : 'password'}
-                                    placeholder="Your password"
-                                    {...field}
-                                 />
+                                 <Input type={showPassword ? 'text' : 'password'} placeholder="Your password" {...field} />
                                  <button
                                     type="button"
-                                    onClick={() =>
-                                       setShowPassword(!showPassword)
-                                    }
+                                    onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2"
                                  >
                                     {showPassword ? (
