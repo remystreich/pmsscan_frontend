@@ -1,10 +1,9 @@
-import InfoPopup from '@/components/InfoPopUp/InfoPopUp';
-import { useInfoPopup } from '@/hooks/useInfoPopUp';
 import AuthLayout from '@/layouts/AuthLayout';
 import ForgetPasswordForm from '@/components/ForgetPasswordForm/ForgetPasswordForm';
+import { usePopupStore } from '@/stores/popupStore';
 
 const ForgetPasswordPage = () => {
-   const { popupState, showPopup } = useInfoPopup();
+   const showPopup = usePopupStore((state) => state.showPopup);
 
    const handleSuccess = (message: string) => {
       showPopup('success', message);
@@ -17,11 +16,6 @@ const ForgetPasswordPage = () => {
    return (
       <AuthLayout>
          <ForgetPasswordForm onSuccess={handleSuccess} onError={handleError} />
-         <InfoPopup
-            message={popupState.message}
-            type={popupState.type}
-            isVisible={popupState.isVisible}
-         />
       </AuthLayout>
    );
 };

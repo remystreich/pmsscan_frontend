@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 import Header from '@/components/Header/Header';
 import useRefreshToken from '@/hooks/useRefreshToken';
 import { useEffect, useState, useRef } from 'react';
+import InfoPopup from '@/components/InfoPopUp/InfoPopUp';
 
 const ProtectedLayout = () => {
    const accessToken = useAuthStore((state) => state.accessToken);
@@ -44,6 +45,7 @@ const ProtectedLayout = () => {
             <Header />
             <Outlet />
          </main>
+         <InfoPopup />
       </div>
    );
 };

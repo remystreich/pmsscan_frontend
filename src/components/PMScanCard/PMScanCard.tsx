@@ -15,8 +15,7 @@ import {
    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import useDeletePMScan from '@/hooks/useDeletePMScan';
-import { useInfoPopup } from '@/hooks/useInfoPopUp';
-import InfoPopup from '@/components/InfoPopUp/InfoPopUp';
+import { usePopupStore } from '@/stores/popupStore';
 
 interface PMScanCardProps {
    pmscan: PMScan;
@@ -27,12 +26,11 @@ const PMScanCard = ({ pmscan }: PMScanCardProps) => {
    const [isPMscanConnected, setIsPmscanConnected] = useState(false);
    const [memoryState, setMemoryState] = useState('');
    const deletePMScan = useDeletePMScan();
-   const { showPopup, popupState } = useInfoPopup();
+   const showPopup = usePopupStore((state) => state.showPopup);
 
    const handleDelete = async () => {
       try {
          await deletePMScan(pmscan.id);
-         console.log('PMScan deleted successfully');
          showPopup('success', 'PMScan deleted successfully');
       } catch (error) {
          console.error('Error in PMScan deletion:', error);
@@ -104,7 +102,6 @@ const PMScanCard = ({ pmscan }: PMScanCardProps) => {
                </div>
             </CardFooter>
          </Card>
-         <InfoPopup message={popupState.message} type={popupState.type} isVisible={popupState.isVisible} />
       </>
    );
 };
