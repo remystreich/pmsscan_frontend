@@ -5,13 +5,12 @@ import { protectedRoutes } from '@/routes/protected.routes';
 import TERA_logotype from '@/assets/TERA_logotype.webp';
 import { Button } from '@/components/ui/button';
 import useLogout from '@/hooks/useLogout';
-import { useInfoPopup } from '@/hooks/useInfoPopUp';
-import InfoPopup from '../InfoPopUp/InfoPopUp';
+import { usePopupStore } from '@/stores/popupStore';
 
 const Sidebar = () => {
    const [isOpen, setIsOpen] = useState(false);
 
-   const { popupState, showPopup } = useInfoPopup();
+   const showPopup = usePopupStore((state) => state.showPopup);
 
    const toggleSidebar = () => {
       setIsOpen(!isOpen);
@@ -48,11 +47,7 @@ const Sidebar = () => {
             <h2 className="mt-5 flex items-center justify-center border-b border-border pb-3">
                <Link to="/home" className="flex justify-center gap-2">
                   <p className="mt-1 font-semibold text-primary">PMScan by</p>
-                  <img
-                     src={TERA_logotype}
-                     alt="Logo"
-                     className="h-auto w-32 max-w-full"
-                  />
+                  <img src={TERA_logotype} alt="Logo" className="h-auto w-32 max-w-full" />
                </Link>
             </h2>
 
@@ -68,9 +63,7 @@ const Sidebar = () => {
                                  className="flex items-center gap-2 rounded-md p-2.5 text-card-foreground no-underline transition-all hover:bg-secondary"
                               >
                                  {Icon && <Icon size={20} />}
-                                 <span className="capitalize">
-                                    {childRoute.path}
-                                 </span>
+                                 <span className="capitalize">{childRoute.path}</span>
                               </Link>
                            </li>
                         );
@@ -83,11 +76,6 @@ const Sidebar = () => {
                </Button>
             </div>
          </aside>
-         <InfoPopup
-            message={popupState.message}
-            type={popupState.type}
-            isVisible={popupState.isVisible}
-         />
       </div>
    );
 };

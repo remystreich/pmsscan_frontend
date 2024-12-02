@@ -1,5 +1,6 @@
 import TERA_logotype from '@/assets/TERA_logotype.webp';
 import pmscan_belt_photo from '@/assets/pmscan_belt_photo.webp';
+import InfoPopup from '@/components/InfoPopUp/InfoPopUp';
 import { useAuthStore } from '@/stores/authStore';
 import { Navigate, useLocation } from 'react-router-dom';
 
@@ -35,6 +36,7 @@ const AuthLayout = ({ children }: AuthLayoutProps) => {
          <div className="col-span-1 flex flex-col items-center justify-center p-5">
             {children}
          </div>
+         <InfoPopup />
       </main>
    );
 };

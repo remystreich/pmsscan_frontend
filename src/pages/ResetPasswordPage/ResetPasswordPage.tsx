@@ -1,13 +1,12 @@
-import InfoPopup from '@/components/InfoPopUp/InfoPopUp';
-import { useInfoPopup } from '@/hooks/useInfoPopUp';
 import AuthLayout from '@/layouts/AuthLayout';
 import ResetPasswordForm from '@/components/ResetPasswordForm/ResetPasswordForm';
 import { useSearchParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import { usePopupStore } from '@/stores/popupStore';
 
 const ResetPasswordPage = () => {
-   const { popupState, showPopup } = useInfoPopup();
+   const showPopup = usePopupStore((state) => state.showPopup);
    const navigate = useNavigate();
 
    const handleSuccess = (message: string) => {
@@ -37,12 +36,8 @@ const ResetPasswordPage = () => {
       return (
          <AuthLayout>
             <div className="mt-8 text-center">
-               <h2 className="text-2xl font-bold">
-                  Invalid reinitialization link
-               </h2>
-               <p className="my-4 text-gray-600">
-                  Make sure you are using the correct link or request a new one.
-               </p>
+               <h2 className="text-2xl font-bold">Invalid reinitialization link</h2>
+               <p className="my-4 text-gray-600">Make sure you are using the correct link or request a new one.</p>
                <Link to="/">
                   <p className="text-md font-semibold underline">Back</p>
                </Link>
@@ -53,16 +48,7 @@ const ResetPasswordPage = () => {
 
    return (
       <AuthLayout>
-         <ResetPasswordForm
-            resetToken={resetToken}
-            onSuccess={handleSuccess}
-            onError={handleError}
-         />
-         <InfoPopup
-            message={popupState.message}
-            type={popupState.type}
-            isVisible={popupState.isVisible}
-         />
+         <ResetPasswordForm resetToken={resetToken} onSuccess={handleSuccess} onError={handleError} />
       </AuthLayout>
    );
 };
