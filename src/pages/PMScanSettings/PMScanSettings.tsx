@@ -2,6 +2,7 @@ import { InfoPMScanCard } from '@/components/InfoPmscanCard/InfoPMScanCard';
 import { UpdateDeviceNameCard } from '@/components/UpdateDeviceNameCard/UpdateDeviceNameCard';
 import { UpdateAcquisitionIntervalCard } from '@/components/UpdateAcquisitionIntervalCard/UpdateAcquisitionIntervalCard';
 import { UpdateLedIntensityCard } from '@/components/UpdateLedIntensityCard/UpdateLedIntensityCard';
+import { UpdateLedTresholdCard } from '@/components/UpdateLedTresholdCard/UpdateLedTresholdCard';
 
 export const PMScanSettings = () => {
    return (
@@ -12,6 +13,7 @@ export const PMScanSettings = () => {
             <UpdateDeviceNameCard />
             <UpdateAcquisitionIntervalCard />
             <UpdateLedIntensityCard />
+            <UpdateLedTresholdCard />
          </div>
       </main>
    );

@@ -17,10 +17,10 @@ export const UpdateLedIntensityCard = () => {
    const ledValue: { [key: number]: string } = {
       0: '1%',
       1: '1%',
-      51: '20%',
-      102: '40%',
-      153: '60%',
-      204: '80%',
+      52: '20%',
+      103: '40%',
+      154: '60%',
+      205: '80%',
       255: '100%',
    };
 
@@ -40,7 +40,6 @@ export const UpdateLedIntensityCard = () => {
             const currentPMScanObj = usePMScanStore.getState().PMScanObj;
             const newDisplay = currentPMScanObj.display;
             newDisplay[8] = value;
-
             usePMScanStore.setState({
                PMScanObj: {
                   ...currentPMScanObj,
