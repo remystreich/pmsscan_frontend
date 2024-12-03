@@ -440,6 +440,22 @@ export class PMScanManager {
       }
    }
 
+   public async writeDisplay(value: Uint8Array): Promise<void> {
+      if (!this.service) {
+         throw new Error('Service is not initialized');
+      }
+      try {
+         const PMScanDisplayUUID = 'f364190a-00b0-4240-ba50-05ca45bf8abc';
+         const displayCharacteristic = await this.service.getCharacteristic(PMScanDisplayUUID);
+         await displayCharacteristic.writeValueWithResponse(value);
+         this.updatePMScanObj({ display: value });
+         this.setInfo({ message: 'Display written successfully', type: 'success' });
+         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+         this.setInfo({ message: 'Error writing display', type: 'error' });
+      }
+   }
+
    private handleCacheData(value: DataView): void {
       const rawData = new Uint8Array(value.buffer);
 
