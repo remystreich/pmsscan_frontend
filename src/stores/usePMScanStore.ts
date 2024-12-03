@@ -38,6 +38,7 @@ export const usePMScanStore = create<PMScanState>()(
             charging: 0,
             isRecording: false,
             externalMemory: false,
+            databaseId: null,
          },
          info: null,
          pmscans: [],

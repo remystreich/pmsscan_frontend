@@ -40,6 +40,7 @@ export const useLogin = (onSuccess?: () => void, onError?: (message: string) => 
             setAccessToken(access_token);
             onSuccess?.();
          }
+         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
          onError?.('Failed to login');
       }

@@ -17,6 +17,7 @@ export interface PMScanObjType {
    charging: number;
    isRecording: boolean;
    externalMemory: boolean;
+   databaseId: number | null;
 }
 
 export interface Info {

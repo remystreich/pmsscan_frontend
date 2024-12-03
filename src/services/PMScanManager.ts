@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { PMScanObjType, Info, MeasuresData, PMScanMode } from '../types/types';
 import { API_URL } from '@/utils/constants';
 import { uint8ArrayToBase64 } from '@/utils/functions';
+import { authFetch } from '@/utils/authFetch';
 
 export class PMScanManager {
    private device: BluetoothDevice | null = null;
@@ -28,6 +29,7 @@ export class PMScanManager {
       charging: 0,
       isRecording: false,
       externalMemory: false,
+      databaseId: null,
    };
 
    public mode: PMScanMode = {
@@ -181,41 +183,33 @@ export class PMScanManager {
    private async registerPMScan(): Promise<void> {
       if (this.storeApi) {
          try {
-            this.getPMscansList();
+            await this.getPMscansList();
             const { pmscans, setPMScans } = this.storeApi.getState();
             const existingPMScan = pmscans.find((pmscan) => pmscan.deviceName === this.PMScanObj.deviceName);
+            this.updatePMScanObj({ name: this.PMScanObj.deviceName });
             if (existingPMScan) {
-               this.updatePMScanObj({ name: existingPMScan.name });
+               this.updatePMScanObj({ databaseId: existingPMScan.id });
                this.updateDisplayCharacteristic(existingPMScan.display);
             } else if (!existingPMScan) {
-               this.updatePMScanObj({ name: this.PMScanObj.deviceName });
                const payload = {
                   name: this.PMScanObj.deviceName,
                   deviceName: this.PMScanObj.deviceName,
                   display: this.uint8ArrayToBase64(this.PMScanObj.display),
                };
+
                const accessToken = this.getAccessToken();
                if (!accessToken) {
                   throw new Error('No access token available');
                }
-               const response = await fetch(`${API_URL}/pmscan`, {
+               const data = await authFetch(`${API_URL}/pmscan`, {
                   method: 'POST',
-                  headers: {
-                     'Content-Type': 'application/json',
-                     Accept: 'application/json',
-                     Authorization: `Bearer ${accessToken}`,
-                  },
-                  credentials: 'include',
                   body: JSON.stringify(payload),
                });
-               if (!response.ok) {
-                  const errorData = await response.json();
-                  throw new Error(`API error: ${JSON.stringify(errorData)}`);
-               }
-               const data = await response.json();
+
                if (data.display && data.display.type === 'Buffer') {
                   data.display = new Uint8Array(data.display.data);
                }
+
                pmscans.push(data);
                setPMScans(pmscans);
             }
@@ -227,19 +221,10 @@ export class PMScanManager {
 
    private async getPMscansList(): Promise<void> {
       if (!this.storeApi) return;
+      const { setPMScans } = this.storeApi.getState();
       try {
-         const { setPMScans } = this.storeApi.getState();
-         const accessToken = this.getAccessToken();
-         const response = await fetch(`${API_URL}/pmscan`, {
-            method: 'GET',
-            headers: {
-               'Content-Type': 'application/json',
-               Accept: 'application/json',
-               Authorization: `Bearer ${accessToken}`,
-            },
-            credentials: 'include',
-         });
-         const data = await response.json();
+         const data = await authFetch(`${API_URL}/pmscan`);
+
          for (let i = 0; i < data.length; i++) {
             if (data[i].display && data[i].display.type === 'Buffer') {
                data[i].display = new Uint8Array(data[i].display.data);
@@ -247,7 +232,7 @@ export class PMScanManager {
          }
          setPMScans(data);
       } catch (error) {
-         console.error('Login error:', error);
+         console.error('Error fetching PMScans:', error);
       }
    }
 
@@ -435,6 +420,23 @@ export class PMScanManager {
       this.updatePMScanConnectionStatus(false);
       if (this.shouldConnect) {
          this.connect();
+      }
+   }
+
+   public async writeInterval(value: number): Promise<void> {
+      if (!this.service) {
+         throw new Error('Service is not initialized');
+      }
+      try {
+         const PMScanIntervalUUID = 'f3641907-00b0-4240-ba50-05ca45bf8abc';
+         const interval = new Uint8Array([value]);
+         const intervalCharacteristic = await this.service.getCharacteristic(PMScanIntervalUUID);
+         await intervalCharacteristic.writeValueWithResponse(interval);
+         this.updatePMScanObj({ interval: value });
+         this.setInfo({ message: 'Interval written successfully', type: 'success' });
+         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+         this.setInfo({ message: 'Error writing interval', type: 'error' });
       }
    }
 
