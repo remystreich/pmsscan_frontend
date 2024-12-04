@@ -1,9 +1,11 @@
 import { StoreApi } from 'zustand';
 import { PMScanState } from '../stores/usePMScanStore';
 import { useAuthStore } from '@/stores/authStore';
-import { PMScanObjType, Info, MeasuresData, PMScanMode } from '../types/types';
+import { PMScanObjType, MeasuresData, PMScanMode } from '../types/types';
 import { API_URL } from '@/utils/constants';
 import { uint8ArrayToBase64 } from '@/utils/functions';
+import { authFetch } from '@/utils/authFetch';
+import { usePopupStore } from '@/stores/popupStore';
 
 export class PMScanManager {
    private device: BluetoothDevice | null = null;
@@ -16,6 +18,7 @@ export class PMScanManager {
 
    private storeApi: StoreApi<PMScanState> | null = null;
    private uint8ArrayToBase64 = uint8ArrayToBase64;
+   private gattOperationInProgress: boolean = false;
 
    public PMScanObj: PMScanObjType = {
       name: 'PMScanXXXXXX',
@@ -28,6 +31,7 @@ export class PMScanManager {
       charging: 0,
       isRecording: false,
       externalMemory: false,
+      databaseId: null,
    };
 
    public mode: PMScanMode = {
@@ -76,16 +80,15 @@ export class PMScanManager {
       }
    }
 
-   private setInfo(info: Info | null): void {
-      if (this.storeApi) {
-         this.storeApi.setState({ info });
-      }
+   private showPopup(message: string, success: boolean): void {
+      const showPopup = usePopupStore.getState().showPopup;
+      showPopup(success ? 'success' : 'error', message);
    }
 
    async requestDevice(): Promise<void> {
       const available = await navigator.bluetooth.getAvailability();
       if (!available) {
-         this.setInfo({ message: 'Bluetooth is not available on this navigator', type: 'error' });
+         this.showPopup('Bluetooth is not available on this navigator', false);
          return;
       }
       try {
@@ -102,10 +105,7 @@ export class PMScanManager {
          }
       } catch (error) {
          console.error(error);
-         this.setInfo({
-            message: 'Bluetooth device request failed',
-            type: 'error',
-         });
+         this.showPopup('Bluetooth device request failed', false);
          console.error('Bluetooth device request failed', error);
       }
    }
@@ -121,7 +121,7 @@ export class PMScanManager {
             this.onPMScanConnected(server);
          },
          () => {
-            this.setInfo({ message: 'Failed to reconnect', type: 'error' });
+            this.showPopup('Failed to reconnect', false);
          },
       );
    }
@@ -170,10 +170,7 @@ export class PMScanManager {
          this.registerPMScan();
       } catch (error) {
          this.disconnectDevice();
-         this.setInfo({
-            message: 'Error initializing PMScan connection',
-            type: 'error',
-         });
+         this.showPopup('Error initializing PMScan connection', false);
          console.error(error, 'onPMScanConnected');
       }
    }
@@ -181,41 +178,33 @@ export class PMScanManager {
    private async registerPMScan(): Promise<void> {
       if (this.storeApi) {
          try {
-            this.getPMscansList();
+            await this.getPMscansList();
             const { pmscans, setPMScans } = this.storeApi.getState();
             const existingPMScan = pmscans.find((pmscan) => pmscan.deviceName === this.PMScanObj.deviceName);
+            this.updatePMScanObj({ name: this.PMScanObj.deviceName });
             if (existingPMScan) {
-               this.updatePMScanObj({ name: existingPMScan.name });
+               this.updatePMScanObj({ databaseId: existingPMScan.id });
                this.updateDisplayCharacteristic(existingPMScan.display);
             } else if (!existingPMScan) {
-               this.updatePMScanObj({ name: this.PMScanObj.deviceName });
                const payload = {
                   name: this.PMScanObj.deviceName,
                   deviceName: this.PMScanObj.deviceName,
                   display: this.uint8ArrayToBase64(this.PMScanObj.display),
                };
+
                const accessToken = this.getAccessToken();
                if (!accessToken) {
                   throw new Error('No access token available');
                }
-               const response = await fetch(`${API_URL}/pmscan`, {
+               const data = await authFetch(`${API_URL}/pmscan`, {
                   method: 'POST',
-                  headers: {
-                     'Content-Type': 'application/json',
-                     Accept: 'application/json',
-                     Authorization: `Bearer ${accessToken}`,
-                  },
-                  credentials: 'include',
                   body: JSON.stringify(payload),
                });
-               if (!response.ok) {
-                  const errorData = await response.json();
-                  throw new Error(`API error: ${JSON.stringify(errorData)}`);
-               }
-               const data = await response.json();
+
                if (data.display && data.display.type === 'Buffer') {
                   data.display = new Uint8Array(data.display.data);
                }
+
                pmscans.push(data);
                setPMScans(pmscans);
             }
@@ -227,19 +216,10 @@ export class PMScanManager {
 
    private async getPMscansList(): Promise<void> {
       if (!this.storeApi) return;
+      const { setPMScans } = this.storeApi.getState();
       try {
-         const { setPMScans } = this.storeApi.getState();
-         const accessToken = this.getAccessToken();
-         const response = await fetch(`${API_URL}/pmscan`, {
-            method: 'GET',
-            headers: {
-               'Content-Type': 'application/json',
-               Accept: 'application/json',
-               Authorization: `Bearer ${accessToken}`,
-            },
-            credentials: 'include',
-         });
-         const data = await response.json();
+         const data = await authFetch(`${API_URL}/pmscan`);
+
          for (let i = 0; i < data.length; i++) {
             if (data[i].display && data[i].display.type === 'Buffer') {
                data[i].display = new Uint8Array(data[i].display.data);
@@ -247,7 +227,7 @@ export class PMScanManager {
          }
          setPMScans(data);
       } catch (error) {
-         console.error('Login error:', error);
+         console.error('Error fetching PMScans:', error);
       }
    }
 
@@ -339,29 +319,18 @@ export class PMScanManager {
          throw new Error('Service is not initialized');
       }
 
+      if (this.gattOperationInProgress) {
+         return;
+      }
+      this.gattOperationInProgress = true;
+
       const PMScanModeUUID = 'f3641908-00b0-4240-ba50-05ca45bf8abc';
       const modeCharacteristic = await this.service.getCharacteristic(PMScanModeUUID);
       const modeValue = await modeCharacteristic.readValue();
       const uint8 = modeValue.getUint8(0);
-      this.updatePMScanObj({ mode: uint8 });
-      this.mode.factoryResetRequested = (uint8 & 0x80) !== 0;
-      this.mode.disconnectRequested = (uint8 & 0x40) !== 0;
-      this.mode.memoryEraseRequested = (uint8 & 0x20) !== 0;
-      this.mode.memoryDownloadRequested = (uint8 & 0x10) !== 0;
-      this.mode.acquisitionStarted = (uint8 & 0x08) !== 0;
-      this.mode.memoryFull = (uint8 & 0x04) !== 0;
-      this.mode.memoryEmpty = (uint8 & 0x02) !== 0;
-      this.mode.lowPowerModeEnabled = (uint8 & 0x01) !== 0;
-      if (this.mode.memoryFull == true && this.mode.memoryEmpty == true) {
-         this.updatePMScanObj({ externalMemory: false });
-      } else {
-         this.updatePMScanObj({ externalMemory: true });
-      }
-      this.storeApi?.setState({ mode: this.mode });
-      if (this.mode.acquisitionStarted) {
-         this.updatePMScanObj({ isRecording: true });
-      }
+      this.updateModeObject(uint8);
       console.log('Mode:', this.mode);
+      this.gattOperationInProgress = false;
    }
 
    private async initializeDisplayCharacteristic(): Promise<void> {
@@ -428,6 +397,8 @@ export class PMScanManager {
          this.shouldConnect = false;
          this.device.gatt.disconnect();
          this.updatePMScanConnectionStatus(false);
+         this.writeMode(0x40);
+         this.PMScanInited = false;
       }
    }
 
@@ -435,6 +406,96 @@ export class PMScanManager {
       this.updatePMScanConnectionStatus(false);
       if (this.shouldConnect) {
          this.connect();
+      }
+   }
+
+   public async writeInterval(value: number): Promise<void> {
+      if (!this.service) {
+         throw new Error('Service is not initialized');
+      }
+      try {
+         const PMScanIntervalUUID = 'f3641907-00b0-4240-ba50-05ca45bf8abc';
+         const interval = new Uint8Array([value]);
+         const intervalCharacteristic = await this.service.getCharacteristic(PMScanIntervalUUID);
+         await intervalCharacteristic.writeValueWithResponse(interval);
+         this.updatePMScanObj({ interval: value });
+         this.showPopup('Interval written successfully', true);
+         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+         this.showPopup('Error writing interval', false);
+      }
+   }
+
+   public async writeDisplay(value: Uint8Array): Promise<void> {
+      if (!this.service) {
+         throw new Error('Service is not initialized');
+      }
+      try {
+         const PMScanDisplayUUID = 'f364190a-00b0-4240-ba50-05ca45bf8abc';
+         const displayCharacteristic = await this.service.getCharacteristic(PMScanDisplayUUID);
+         await displayCharacteristic.writeValueWithResponse(value);
+         this.updatePMScanObj({ display: value });
+         this.showPopup('Display written successfully', true);
+         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+         this.showPopup('Error writing display', false);
+      }
+   }
+
+   updateModeObject(value: number): void {
+      this.mode.factoryResetRequested = (value & 0x80) !== 0;
+      this.mode.disconnectRequested = (value & 0x40) !== 0;
+      this.mode.memoryEraseRequested = (value & 0x20) !== 0;
+      this.mode.memoryDownloadRequested = (value & 0x10) !== 0;
+      this.mode.acquisitionStarted = (value & 0x08) !== 0;
+      this.mode.memoryFull = (value & 0x04) !== 0;
+      this.mode.memoryEmpty = (value & 0x02) !== 0;
+      this.mode.lowPowerModeEnabled = (value & 0x01) !== 0;
+
+      if (this.mode.memoryFull == true && this.mode.memoryEmpty == true) {
+         this.updatePMScanObj({ externalMemory: false });
+      } else {
+         this.updatePMScanObj({ externalMemory: true });
+      }
+      this.storeApi?.setState({ mode: this.mode });
+      if (this.mode.acquisitionStarted) {
+         this.updatePMScanObj({ isRecording: true });
+      }
+      this.updatePMScanObj({ mode: value });
+   }
+
+   async writeMode(modeFlags: number, toZero: boolean = false, shouldRead: boolean = true): Promise<void> {
+      if (!this.service) {
+         throw new Error('Service is not initialized');
+      }
+      if (this.gattOperationInProgress) {
+         return;
+      }
+
+      try {
+         this.gattOperationInProgress = true;
+         const PMScanModeUUID = 'f3641908-00b0-4240-ba50-05ca45bf8abc';
+         const modeCharacteristic = await this.service.getCharacteristic(PMScanModeUUID);
+         const modeValue = await modeCharacteristic.readValue();
+         const currentValue = modeValue.getUint8(0);
+         const modeToWrite = new Uint8Array(1);
+         if (toZero === true) {
+            modeToWrite[0] = currentValue & ~modeFlags;
+         } else {
+            modeToWrite[0] = currentValue | modeFlags;
+         }
+         await modeCharacteristic.writeValueWithResponse(modeToWrite);
+         this.updateModeObject(modeToWrite[0]);
+         // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+         if (modeFlags !== 0x80) {
+            this.showPopup('Error writing mode', false);
+         }
+      } finally {
+         this.gattOperationInProgress = false;
+         if (shouldRead) {
+            this.ReadMode();
+         }
       }
    }
 
