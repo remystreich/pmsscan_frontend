@@ -34,7 +34,7 @@ const Sidebar = () => {
       <div className="relative">
          <button
             onClick={toggleSidebar}
-            className="fixed left-2.5 top-1 z-[1010] rounded-lg bg-transparent p-2 text-primary md:block lg:hidden"
+            className="fixed left-2.5 top-1 z-40 rounded-lg bg-transparent p-2 text-primary md:block lg:hidden"
          >
             <Menu size={40} />
          </button>

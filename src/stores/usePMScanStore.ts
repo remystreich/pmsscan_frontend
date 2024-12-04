@@ -1,3 +1,4 @@
+import { SelectorMatcherOptions } from './../../node_modules/@testing-library/dom/types/query-helpers.d';
 import { create, StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { PMScanManager } from '../services/PMScanManager';
@@ -8,14 +9,14 @@ export interface PMScanState {
    isConnected: boolean;
    measuresData: MeasuresData | null;
    PMScanObj: PMScanObjType;
-   info: Info | null;
    pmscans: PMScan[];
    isLoading: boolean;
    error: string | null;
    mode: PMScanMode;
    connect: () => void;
    disconnect: () => void;
-   setInfo: (info: Info | null) => void;
+   resetToFactory: () => void;
+   eraseDataLoggerData: () => void;
    setPMScans: (pmscans: PMScan[]) => void;
    setIsLoading: (isLoading: boolean) => void;
    setError: (error: string | null) => void;
@@ -40,7 +41,6 @@ export const usePMScanStore = create<PMScanState>()(
             externalMemory: false,
             databaseId: null,
          },
-         info: null,
          pmscans: [],
          isLoading: false,
          error: null,
@@ -65,7 +65,22 @@ export const usePMScanStore = create<PMScanState>()(
             manager.disconnectDevice();
          },
 
-         setInfo: (info: Info | null) => set({ info }),
+         resetToFactory: async () => {
+            if (usePMScanStore.getState().isConnected === false) return;
+            const { manager } = usePMScanStore.getState();
+            manager.writeMode(0x80, false, false);
+            setTimeout(() => {
+               manager.disconnectDevice();
+            }, 1000);
+         },
+
+         eraseDataLoggerData: async () => {
+            if (usePMScanStore.getState().isConnected === false) return;
+            const { manager } = usePMScanStore.getState();
+            await manager.writeMode(0x08, true, false); // stopper enregistrement
+            await new Promise(resolve => setTimeout(resolve, 200)); // sleep 200ms
+            await manager.writeMode(0x20, false, false); // effacer les données
+         },
 
          setPMScans: (pmscans) => set({ pmscans }),
          setIsLoading: (isLoading) => set({ isLoading }),
