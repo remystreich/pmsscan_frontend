@@ -1,13 +1,13 @@
-import { SelectorMatcherOptions } from './../../node_modules/@testing-library/dom/types/query-helpers.d';
 import { create, StoreApi } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { PMScanManager } from '../services/PMScanManager';
-import { MeasuresData, PMScanObjType, Info, PMScanMode, PMScan } from '../types/types';
+import { MeasuresData, PMScanObjType, PMScanMode, PMScan } from '../types/types';
 
 export interface PMScanState {
    manager: PMScanManager;
    isConnected: boolean;
    measuresData: MeasuresData | null;
+   datasForChart: Uint8Array[];
    PMScanObj: PMScanObjType;
    pmscans: PMScan[];
    isLoading: boolean;
@@ -28,6 +28,7 @@ export const usePMScanStore = create<PMScanState>()(
          manager: new PMScanManager(api),
          isConnected: false,
          measuresData: null,
+         datasForChart: [],
          PMScanObj: {
             name: '',
             deviceName: '',
@@ -78,7 +79,7 @@ export const usePMScanStore = create<PMScanState>()(
             if (usePMScanStore.getState().isConnected === false) return;
             const { manager } = usePMScanStore.getState();
             await manager.writeMode(0x08, true, false); // stopper enregistrement
-            await new Promise(resolve => setTimeout(resolve, 200)); // sleep 200ms
+            await new Promise((resolve) => setTimeout(resolve, 200)); // sleep 200ms
             await manager.writeMode(0x20, false, false); // effacer les données
          },
 

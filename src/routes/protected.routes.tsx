@@ -4,7 +4,8 @@ import Home from '@/pages/Home/Home';
 import RecordsPage from '@/pages/Records/RecordsPage';
 import AccountSettings from '@/pages/AccountSettings/AccountSettings';
 import { PMScanSettings } from '@/pages/PMScanSettings/PMScanSettings';
-import { House, LucideIcon, Clipboard, UserRoundPen, Settings } from 'lucide-react';
+import { House, LucideIcon, Clipboard, UserRoundPen, Settings, ChartLine } from 'lucide-react';
+import { RealTimeView } from '@/pages/RealTimeView/RealTimeView';
 
 interface CustomRouteObject extends Omit<RouteObject, 'children'> {
    icon?: LucideIcon;
@@ -35,6 +36,11 @@ export const protectedRoutes: CustomRouteObject[] = [
             path: 'pmscan-settings',
             element: <PMScanSettings />,
             icon: Settings,
+         },
+         {
+            path: 'real-time-view',
+            element: <RealTimeView />,
+            icon: ChartLine,
          },
       ],
    },

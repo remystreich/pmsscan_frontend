@@ -19,6 +19,8 @@ export class PMScanManager {
    private storeApi: StoreApi<PMScanState> | null = null;
    private uint8ArrayToBase64 = uint8ArrayToBase64;
    private gattOperationInProgress: boolean = false;
+   private pendingData: Uint8Array[] = [];
+   private timerForPendingData: NodeJS.Timeout | null = null;
 
    public PMScanObj: PMScanObjType = {
       name: 'PMScanXXXXXX',
@@ -80,9 +82,29 @@ export class PMScanManager {
       }
    }
 
+   private updateDatasForChart(datasForChart: Uint8Array[]): void {
+      if (this.storeApi) {
+         this.storeApi.setState(() => ({
+            datasForChart: [...datasForChart],
+         }));
+      }
+      // const test = this.storeApi.getState().datasForChart;
+      // test.forEach((rawData) => {
+      //    const dt2000 = 946684800;
+      //    const ts2000 =
+      //       ((rawData[3] & 0xff) << 24) | ((rawData[2] & 0xff) << 16) | ((rawData[1] & 0xff) << 8) | (rawData[0] & 0xff);
+      //    const measuredAt = new Date((ts2000 + dt2000) * 1000);
+      //    console.log('Measured At:', measuredAt);
+      // }); TODO: Remove this
+   }
+
    private showPopup(message: string, success: boolean): void {
       const showPopup = usePopupStore.getState().showPopup;
       showPopup(success ? 'success' : 'error', message);
+   }
+
+   private readTimeStamp(rawData: Uint8Array): number {
+      return ((rawData[3] & 0xff) << 24) | ((rawData[2] & 0xff) << 16) | ((rawData[1] & 0xff) << 8) | (rawData[0] & 0xff);
    }
 
    async requestDevice(): Promise<void> {
@@ -395,9 +417,9 @@ export class PMScanManager {
    public disconnectDevice(): void {
       if (this.device?.gatt?.connected) {
          this.shouldConnect = false;
-         this.device.gatt.disconnect();
          this.updatePMScanConnectionStatus(false);
-         this.writeMode(0x40);
+         this.device.gatt.disconnect();
+         this.writeMode(0x40, false, false);
          this.PMScanInited = false;
       }
    }
@@ -488,7 +510,7 @@ export class PMScanManager {
          this.updateModeObject(modeToWrite[0]);
          // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
-         if (modeFlags !== 0x80) {
+         if (modeFlags !== 0x80 && modeFlags !== 0x40) {
             this.showPopup('Error writing mode', false);
          }
       } finally {
@@ -503,18 +525,28 @@ export class PMScanManager {
       const rawData = new Uint8Array(value.buffer);
 
       if (rawData != null && rawData[9] !== 0xff && rawData[8] !== 0xff && rawData[9] !== 0xaf && rawData[8] !== 0xaf) {
-         // this.addRawDataToQueue(rawData, false);
-
-         const measuresData = {
-            pm1: (((rawData[9] & 0xff) << 8) | (rawData[8] & 0xff)) / 10,
-            pm10: (((rawData[13] & 0xff) << 8) | (rawData[12] & 0xff)) / 10,
-            pm25: (((rawData[11] & 0xff) << 8) | (rawData[10] & 0xff)) / 10,
-            temp: ((rawData[15] & 0xff) << 8) | (rawData[14] & 0xff),
-            hum: ((rawData[17] & 0xff) << 8) | (rawData[16] & 0xff),
-         };
-
-         console.log('Measures Data:', measuresData);
+         this.pendingData.push(rawData);
+         clearTimeout(this.timerForPendingData as NodeJS.Timeout);
+         this.timerForPendingData = setTimeout(() => {
+            this.processPendingData();
+         }, 2500);
       }
+   }
+
+   private processPendingData(): void {
+      this.pendingData.sort((a, b) => {
+         const timestampA = this.readTimeStamp(a);
+         const timestampB = this.readTimeStamp(b);
+         return timestampA - timestampB;
+      });
+
+      this.pendingData.forEach((rawData) => {
+         if (rawData != null && rawData[9] !== 0xff && rawData[8] !== 0xff && rawData[9] !== 0xaf && rawData[8] !== 0xaf) {
+            this.addRawDataToQueue(rawData, true);
+         }
+      });
+
+      this.pendingData = [];
    }
 
    private handleDataLoggerData(value: DataView): void {
@@ -539,7 +571,7 @@ export class PMScanManager {
       const rawData = new Uint8Array(value.buffer);
 
       if (rawData != null && rawData[9] !== 0xff && rawData[8] !== 0xff && rawData[9] !== 0xaf && rawData[8] !== 0xaf) {
-         // this.addRawDataToQueue(rawData, false);
+         this.addRawDataToQueue(rawData, false);
 
          const measuresData = {
             pm1: (((rawData[9] & 0xff) << 8) | (rawData[8] & 0xff)) / 10,
@@ -549,7 +581,25 @@ export class PMScanManager {
             hum: ((rawData[17] & 0xff) << 8) | (rawData[16] & 0xff),
          };
          this.updateMeasuresData(measuresData);
-         console.log('Measures Data:', measuresData);
       }
+   }
+
+   private addRawDataToQueue(rawData: Uint8Array, isIMData: boolean): void {
+      if (!this.storeApi) {
+         return;
+      }
+      const datasForChart = this.storeApi?.getState().datasForChart;
+      if (datasForChart.length >= 7200) {
+         datasForChart.shift();
+      }
+      datasForChart.push(rawData);
+      if (isIMData == true) {
+         datasForChart.sort((a, b) => {
+            const timestampA = this.readTimeStamp(a);
+            const timestampB = this.readTimeStamp(b);
+            return timestampA - timestampB;
+         });
+      }
+      this.updateDatasForChart(datasForChart);
    }
 }
