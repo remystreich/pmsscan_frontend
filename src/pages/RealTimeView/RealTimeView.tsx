@@ -2,7 +2,6 @@ import { usePMScanStore } from '@/stores/usePMScanStore';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactEcharts from 'echarts-for-react';
 import { Button } from '@/components/ui/button';
-import { i } from 'node_modules/vite/dist/node/types.d-aGj9QkWt';
 
 interface PMData {
    pm1: [number, number][];
