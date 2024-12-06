@@ -2,6 +2,7 @@ import { usePMScanStore } from '@/stores/usePMScanStore';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import ReactEcharts from 'echarts-for-react';
 import { Button } from '@/components/ui/button';
+import { i } from 'node_modules/vite/dist/node/types.d-aGj9QkWt';
 
 interface PMData {
    pm1: [number, number][];
@@ -14,7 +15,7 @@ interface DataZoomEvent {
 }
 
 export const RealTimeView = () => {
-   const { datasForChart } = usePMScanStore();
+   const { datasForChart, PMScanObj } = usePMScanStore();
    const [pmData, setPmData] = useState<PMData>({
       pm1: [[0, 0]],
       pm25: [[0, 0]],
@@ -26,6 +27,13 @@ export const RealTimeView = () => {
    const [startTimeForChart, setStartTimeForChart] = useState(new Date().getTime() - timeRange);
    const [endTimeForChart, setEndTimeForChart] = useState(new Date().getTime());
    const chartRef = useRef<ReactEcharts | null>(null);
+   const [disabledButtons, setDisabledButtons] = useState({
+      '1m': false,
+      '10m': false,
+      '30m': false,
+      '1h': false,
+      '24h': false,
+   });
 
    const getOption = () => ({
       tooltip: {
@@ -44,15 +52,30 @@ export const RealTimeView = () => {
       ],
       legend: {
          data: ['PM 1', 'PM 2.5', 'PM 10'],
+         top: '10%',
       },
       title: {
          text: 'Real Time Chart',
+         top: '3%',
+      },
+      grid: {
+         top: '20%',
+         left: '3%',
+         right: '4%',
+         bottom: '10%',
+         containLabel: true,
       },
       xAxis: {
          type: 'time',
+         axisLabel: {
+            margin: 10,
+         },
       },
       yAxis: {
          type: 'value',
+         axisLabel: {
+            margin: 10,
+         },
       },
       series: [
          {
@@ -124,7 +147,6 @@ export const RealTimeView = () => {
          setResetZoom(false);
          setActiveButton('');
       }
-      // console.log(event.batch[0].start, event.batch[0].end);
    }, []);
 
    const onEvents = useRef({
@@ -188,22 +210,92 @@ export const RealTimeView = () => {
       }
    }, [startTimeForChart, endTimeForChart]);
 
+   useEffect(() => {
+      const interval = PMScanObj.interval;
+      if (interval === 5 || interval === 4) {
+         setDisabledButtons({
+            '1m': false,
+            '10m': false,
+            '30m': false,
+            '1h': false,
+            '24h': true,
+         });
+
+         if (activeButton === '24h') {
+            handleTimeSelect('1h');
+         }
+      }
+      if (interval === 2 || interval == 1) {
+         setDisabledButtons({
+            '1m': true,
+            '10m': false,
+            '30m': false,
+            '1h': false,
+            '24h': false,
+         });
+         if (activeButton === '1m') {
+            handleTimeSelect('10m');
+         }
+      }
+      if (interval === 0) {
+         setDisabledButtons({
+            '1m': true,
+            '10m': true,
+            '30m': false,
+            '1h': false,
+            '24h': false,
+         });
+         if (activeButton === '1m' || activeButton === '10m') {
+            handleTimeSelect('30m');
+         }
+      }
+      if (interval === 3) {
+         setDisabledButtons({
+            '1m': false,
+            '10m': false,
+            '30m': false,
+            '1h': false,
+            '24h': false,
+         });
+      }
+   }, [PMScanObj.interval, activeButton]);
+
    return (
-      <section className="p-2">
-         <div className="m-4 flex items-center gap-4">
-            <Button variant={activeButton === '1m' ? 'default' : 'secondary'} onClick={() => handleTimeSelect('1m')}>
+      <section className="z-0 p-2">
+         <div className="flex items-center gap-4 lg:m-4">
+            <Button
+               variant={activeButton === '1m' ? 'default' : 'secondary'}
+               onClick={() => handleTimeSelect('1m')}
+               disabled={disabledButtons['1m']}
+            >
                1 m
             </Button>
-            <Button variant={activeButton === '10m' ? 'default' : 'secondary'} onClick={() => handleTimeSelect('10m')}>
+            <Button
+               variant={activeButton === '10m' ? 'default' : 'secondary'}
+               onClick={() => handleTimeSelect('10m')}
+               disabled={disabledButtons['10m']}
+            >
                10 m
             </Button>
-            <Button variant={activeButton === '30m' ? 'default' : 'secondary'} onClick={() => handleTimeSelect('30m')}>
+            <Button
+               variant={activeButton === '30m' ? 'default' : 'secondary'}
+               onClick={() => handleTimeSelect('30m')}
+               disabled={disabledButtons['30m']}
+            >
                30 m
             </Button>
-            <Button variant={activeButton === '1h' ? 'default' : 'secondary'} onClick={() => handleTimeSelect('1h')}>
+            <Button
+               variant={activeButton === '1h' ? 'default' : 'secondary'}
+               onClick={() => handleTimeSelect('1h')}
+               disabled={disabledButtons['1h']}
+            >
                1 h
             </Button>
-            <Button variant={activeButton === '24h' ? 'default' : 'secondary'} onClick={() => handleTimeSelect('24h')}>
+            <Button
+               variant={activeButton === '24h' ? 'default' : 'secondary'}
+               onClick={() => handleTimeSelect('24h')}
+               disabled={disabledButtons['24h']}
+            >
                24 h
             </Button>
          </div>

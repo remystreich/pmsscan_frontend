@@ -40,7 +40,7 @@ const Sidebar = () => {
          </button>
 
          <aside
-            className={`fixed left-0 top-0 h-screen w-full max-w-screen-sm bg-card p-2 text-card-foreground shadow-md transition-transform duration-300 ease-in-out md:w-60 lg:fixed lg:block lg:w-60 ${
+            className={`fixed left-0 top-0 z-30 h-screen w-full max-w-screen-sm bg-card p-2 text-card-foreground shadow-md transition-transform duration-300 ease-in-out md:w-60 lg:fixed lg:block lg:w-60 ${
                isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
             }`}
          >
