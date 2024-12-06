@@ -20,6 +20,8 @@ export interface PMScanState {
    setPMScans: (pmscans: PMScan[]) => void;
    setIsLoading: (isLoading: boolean) => void;
    setError: (error: string | null) => void;
+   startOnlineRecording: () => void;
+   stopOnlineRecording: () => void;
 }
 
 export const usePMScanStore = create<PMScanState>()(
@@ -86,6 +88,16 @@ export const usePMScanStore = create<PMScanState>()(
          setPMScans: (pmscans) => set({ pmscans }),
          setIsLoading: (isLoading) => set({ isLoading }),
          setError: (error) => set({ error }),
+         startOnlineRecording: () => {
+            const { manager } = usePMScanStore.getState();
+            manager.isOnlineRecording = true;
+            manager.updatePMScanObj({ isRecording: true });
+         },
+         stopOnlineRecording: () => {
+            const { manager } = usePMScanStore.getState();
+            manager.isOnlineRecording = false;
+            manager.updatePMScanObj({ isRecording: false });
+         },
       }),
       {
          name: 'PMScan Store',

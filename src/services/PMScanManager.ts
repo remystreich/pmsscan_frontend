@@ -16,11 +16,16 @@ export class PMScanManager {
    public PMScanInited: boolean = false;
    public PMScanTime: number = 0;
 
+   public isOnlineRecording: boolean = false;
+
    private storeApi: StoreApi<PMScanState> | null = null;
    private uint8ArrayToBase64 = uint8ArrayToBase64;
    private gattOperationInProgress: boolean = false;
    private pendingData: Uint8Array[] = [];
    private timerForPendingData: NodeJS.Timeout | null = null;
+
+   //pour online recording, on a besoin de l'id du record en cours, si id ==0 on crée un nouveau record, sinon on ajoute les données à l'id du record
+   private recordId: number = 0;
 
    public PMScanObj: PMScanObjType = {
       name: 'PMScanXXXXXX',
@@ -63,7 +68,7 @@ export class PMScanManager {
       }
    }
 
-   private updatePMScanObj(partialObj: Partial<PMScanObjType>) {
+   public updatePMScanObj(partialObj: Partial<PMScanObjType>) {
       this.PMScanObj = { ...this.PMScanObj, ...partialObj };
       if (this.storeApi) {
          this.storeApi.setState((state) => ({
@@ -601,5 +606,48 @@ export class PMScanManager {
          });
       }
       this.updateDatasForChart(datasForChart);
+      if (this.isOnlineRecording) {
+         this.handleOnlineRecording(rawData);
+      }
+   }
+
+   private async handleOnlineRecording(rawData: Uint8Array): Promise<void> {
+      if (this.recordId === 0) {
+         try {
+            const accessToken = this.getAccessToken();
+            if (!accessToken) {
+               throw new Error('No access token available');
+            }
+            const data = await authFetch(`${API_URL}/records/${this.PMScanObj.databaseId}`, {
+               method: 'POST',
+               body: JSON.stringify({
+                  data: this.uint8ArrayToBase64(rawData),
+                  name: this.PMScanObj.deviceName + '-' + new Date().toISOString(),
+               }),
+            });
+            this.recordId = data.id;
+            console.log('Record created:', data);
+         } catch (error) {
+            console.error('Error registering record:', error);
+            this.showPopup('Error registering record:', false);
+         }
+      } else {
+         try {
+            const accessToken = this.getAccessToken();
+            if (!accessToken) {
+               throw new Error('No access token available');
+            }
+            await authFetch(`${API_URL}/records/append-data/${this.recordId}`, {
+               method: 'PATCH',
+               body: JSON.stringify({
+                  data: this.uint8ArrayToBase64(rawData),
+                  name: this.PMScanObj.deviceName + '-' + new Date().toISOString(),
+               }),
+            });
+         } catch (error) {
+            console.error('Error updating record:', error);
+            this.showPopup('Error updating record:', false);
+         }
+      }
    }
 }
