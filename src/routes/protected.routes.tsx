@@ -22,25 +22,29 @@ export const protectedRoutes: CustomRouteObject[] = [
             element: <Home />,
             icon: House,
          },
+
+         {
+            path: 'real-time-view',
+            element: <RealTimeView />,
+            icon: ChartLine,
+         },
+
          {
             path: 'records',
             element: <RecordsPage />,
             icon: Clipboard,
          },
-         {
-            path: 'account-settings',
-            element: <AccountSettings />,
-            icon: UserRoundPen,
-         },
+
          {
             path: 'pmscan-settings',
             element: <PMScanSettings />,
             icon: Settings,
          },
+
          {
-            path: 'real-time-view',
-            element: <RealTimeView />,
-            icon: ChartLine,
+            path: 'account-settings',
+            element: <AccountSettings />,
+            icon: UserRoundPen,
          },
       ],
    },

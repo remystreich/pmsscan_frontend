@@ -44,6 +44,10 @@ const PMScanCard = ({ pmscan }: PMScanCardProps) => {
       } else {
          setIsPmscanConnected(false);
       }
+      if (pmscan.deviceName !== PMScanObj.deviceName) {
+         setMemoryState('---');
+         return;
+      }
 
       if (PMScanObj.externalMemory == false) {
          setMemoryState('none');

@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
+import AutoFadeModal from '@/components/AutoFadeModal/AutoFadeModal';
 
 export const PMScanSettings = () => {
    const { resetToFactory, eraseDataLoggerData, isConnected } = usePMScanStore();
@@ -64,14 +65,11 @@ export const PMScanSettings = () => {
                <div className={`absolute size-full bg-white opacity-50 ${isConnected ? 'hidden' : ''}`}></div>
             </div>
          </div>
-         <div
-            className={`${isErasing ? 'fixed' : 'hidden'} top-0 z-50 flex h-screen w-screen items-center justify-center bg-black/80`}
-         >
-            <div className="flex items-center justify-center gap-2 rounded-md border border-border bg-background px-10 py-5">
-               <p className="text-xl">Erasing datas...</p>
-               <LoaderCircle className="size-8 animate-spin" />
-            </div>
-         </div>
+
+         <AutoFadeModal isVisible={isErasing} delay={2000}>
+            <p className="text-xl">Erasing datas...</p>
+            <LoaderCircle className="size-8 animate-spin" />
+         </AutoFadeModal>
       </section>
    );
 };

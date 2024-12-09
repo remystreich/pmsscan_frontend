@@ -20,6 +20,10 @@ export interface PMScanState {
    setPMScans: (pmscans: PMScan[]) => void;
    setIsLoading: (isLoading: boolean) => void;
    setError: (error: string | null) => void;
+   startOnlineRecording: () => void;
+   stopOnlineRecording: () => void;
+   startDataloggerRecording: () => void;
+   downladDataLoggerData: () => void;
 }
 
 export const usePMScanStore = create<PMScanState>()(
@@ -79,13 +83,36 @@ export const usePMScanStore = create<PMScanState>()(
             if (usePMScanStore.getState().isConnected === false) return;
             const { manager } = usePMScanStore.getState();
             await manager.writeMode(0x08, true, false); // stopper enregistrement
+            manager.updatePMScanObj({ isRecording: false });
             await new Promise((resolve) => setTimeout(resolve, 200)); // sleep 200ms
             await manager.writeMode(0x20, false, false); // effacer les données
+            await new Promise((resolve) => setTimeout(resolve, 500)); // sleep 200ms
+            await manager.ReadMode();
          },
 
          setPMScans: (pmscans) => set({ pmscans }),
          setIsLoading: (isLoading) => set({ isLoading }),
          setError: (error) => set({ error }),
+         startOnlineRecording: () => {
+            const { manager } = usePMScanStore.getState();
+            manager.isOnlineRecording = true;
+            manager.updatePMScanObj({ isRecording: true });
+         },
+         stopOnlineRecording: () => {
+            const { manager } = usePMScanStore.getState();
+            manager.isOnlineRecording = false;
+            manager.updatePMScanObj({ isRecording: false });
+         },
+         startDataloggerRecording: () => {
+            const { manager } = usePMScanStore.getState();
+            manager.isOnlineRecording = false;
+            manager.writeMode(0x08);
+         },
+         downladDataLoggerData: () => {
+            const { manager } = usePMScanStore.getState();
+            manager.dataLoggerTransfer = true;
+            manager.writeMode(0x10);
+         },
       }),
       {
          name: 'PMScan Store',

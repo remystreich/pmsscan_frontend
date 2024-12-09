@@ -20,35 +20,35 @@ const Header = () => {
             return (
                <div className="flex items-center justify-center gap-1">
                   <BatteryFull className="w-6 text-lime-500" />
-                  <p className="lg:text-md text-sm">{PMScanObj.battery}%</p>
+                  <p className="lg:text-md text-xs">{PMScanObj.battery}%</p>
                </div>
             );
          } else if (PMScanObj.battery >= 80 && PMScanObj.battery < 100) {
             return (
                <div className="flex items-center justify-center gap-1">
                   <BatteryMedium className="w-6 text-lime-500" />
-                  <p className="lg:text-md text-sm">{PMScanObj.battery}%</p>
+                  <p className="lg:text-md text-xs">{PMScanObj.battery}%</p>
                </div>
             );
          } else if (PMScanObj.battery < 80 && PMScanObj.battery >= 50) {
             return (
                <div className="flex items-center justify-center gap-1">
                   <BatteryMedium className="w-6 text-yellow-500" />
-                  <p className="lg:text-md text-sm">{PMScanObj.battery}%</p>
+                  <p className="lg:text-md text-xs">{PMScanObj.battery}%</p>
                </div>
             );
          } else if (PMScanObj.battery < 50 && PMScanObj.battery >= 15) {
             return (
                <div className="flex items-center justify-center gap-1">
                   <BatteryLow className="w-6 text-orange-500" />
-                  <p className="lg:text-md text-sm">{PMScanObj.battery}%</p>
+                  <p className="lg:text-md text-xs">{PMScanObj.battery}%</p>
                </div>
             );
          } else if (PMScanObj.battery < 15) {
             return (
                <div className="flex items-center justify-center gap-1">
                   <BatteryWarning className="w-6 text-red-500" />
-                  <p className="lg:text-md text-sm">{PMScanObj.battery}%</p>
+                  <p className="lg:text-md text-xs">{PMScanObj.battery}%</p>
                </div>
             );
          }
@@ -58,7 +58,7 @@ const Header = () => {
                return (
                   <div className="flex items-center justify-center gap-1">
                      <BatteryCharging className="w-6 text-red-500" />
-                     <p className="lg:text-md text-sm">Charging</p>
+                     <p className="lg:text-md text-xs">Charging</p>
                   </div>
                );
 
@@ -66,7 +66,7 @@ const Header = () => {
                return (
                   <div className="flex items-center justify-center gap-1">
                      <BatteryCharging className="w-6 text-yellow-500" />
-                     <p className="lg:text-md text-sm">Charging</p>
+                     <p className="lg:text-md text-xs">Charging</p>
                   </div>
                );
 
@@ -74,7 +74,7 @@ const Header = () => {
                return (
                   <div className="flex items-center justify-center gap-1">
                      <BatteryCharging className="w-6 text-green-500" />
-                     <p className="lg:text-md text-sm">Charging</p>
+                     <p className="lg:text-md text-xs">Charging</p>
                   </div>
                );
 
@@ -136,23 +136,31 @@ const Header = () => {
    };
 
    const recordingState = () => {
-      if (PMScanObj.isRecording && PMScanObj.externalMemory) {
+      if (PMScanObj.isRecording && PMScanObj.externalMemory && mode.acquisitionStarted === true && mode.memoryFull === false) {
          return 'Datalogger Recording';
-      } else if (PMScanObj.isRecording && PMScanObj.externalMemory === false) {
+      } else if (
+         (PMScanObj.isRecording && PMScanObj.externalMemory === false) ||
+         (PMScanObj.isRecording === true &&
+            mode.acquisitionStarted === false &&
+            mode.memoryFull === false &&
+            mode.memoryEmpty === true)
+      ) {
          return 'Online Recording';
-      } else if (mode.memoryFull) {
+      } else if (mode.memoryFull && PMScanObj.externalMemory === true) {
          return 'Memory full';
-      } else if (!mode.memoryFull && !mode.memoryEmpty && !mode.acquisitionStarted) {
+      } else if (Object.values(mode).every((value) => value === false) && isConnected === true) {
          return 'Record stopped';
-      } else {
+      } else if (mode.memoryEmpty === true && PMScanObj.isRecording === false) {
          return 'Ready';
+      } else if (mode.memoryDownloadRequested === true) {
+         return 'Downloading';
       }
    };
 
    return (
       <header className="bg-card p-2 shadow-md">
          <div className="flex flex-col lg:flex-row">
-            <div className="flex flex-1 justify-end lg:order-2">
+            <div className="flex flex-1 justify-end lg:order-2 lg:max-w-40">
                <Button variant={isConnected ? 'destructive' : 'default'} onClick={handleButtonClick}>
                   {isConnected ? 'Disconnect' : 'Connect'}
                </Button>
@@ -162,12 +170,12 @@ const Header = () => {
                   <>
                      <div className="flex items-center gap-1">
                         <Wifi className="w-5 text-primary" />
-                        <p className="lg:text-md text-sm">Connected</p>
+                        <p className="lg:text-md text-xs">Connected</p>
                      </div>
-                     <p className="lg:text-md text-sm">{PMScanObj.name} </p>
+                     <p className="lg:text-md text-xs">{PMScanObj.name} </p>
                      <div className="flex items-center gap-1">
                         <HardDrive className="w-4" />
-                        <p className="lg:text-md max-w-16 text-sm md:max-w-full"> {recordingState()} </p>
+                        <p className="lg:text-md max-w-16 text-xs md:max-w-full"> {recordingState()} </p>
                      </div>
                      <>{batteryState()}</>
                   </>
