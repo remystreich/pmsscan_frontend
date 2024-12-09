@@ -12,7 +12,6 @@ export class PMScanManager {
    private gatt: BluetoothRemoteGATTServer | null = null;
    private service: BluetoothRemoteGATTService | null = null;
    private shouldConnect: boolean = false;
-   private dataLoggerTransfer: boolean = false;
    public PMScanInited: boolean = false;
    public PMScanTime: number = 0;
 
@@ -23,6 +22,9 @@ export class PMScanManager {
    private gattOperationInProgress: boolean = false;
    private pendingData: Uint8Array[] = [];
    private timerForPendingData: NodeJS.Timeout | null = null;
+
+   public dataLoggerTransfer: boolean = false;
+   private dataloggerPendingData: Uint8Array[] = [];
 
    //pour online recording, on a besoin de l'id du record en cours, si id ==0 on crée un nouveau record, sinon on ajoute les données à l'id du record
    private recordId: number = 0;
@@ -341,7 +343,7 @@ export class PMScanManager {
       this.updatePMScanObj({ interval: intervalValue.getUint8(0) });
    }
 
-   private async ReadMode(): Promise<void> {
+   public async ReadMode(): Promise<void> {
       if (!this.service) {
          throw new Error('Service is not initialized');
       }
@@ -528,6 +530,10 @@ export class PMScanManager {
 
    private handleCacheData(value: DataView): void {
       const rawData = new Uint8Array(value.buffer);
+      if (rawData[18] == 0xaf && rawData[19] == 0xaf) {
+         this.dataLoggerTransfer = true;
+         return;
+      }
 
       if (rawData != null && rawData[9] !== 0xff && rawData[8] !== 0xff && rawData[9] !== 0xaf && rawData[8] !== 0xaf) {
          this.pendingData.push(rawData);
@@ -554,21 +560,62 @@ export class PMScanManager {
       this.pendingData = [];
    }
 
-   private handleDataLoggerData(value: DataView): void {
+   private recordNumber: number = 0;
+   private startTime: number | null = null;
+
+   private async handleDataLoggerData(value: DataView): Promise<void> {
       const rawData = new Uint8Array(value.buffer);
 
-      if (rawData != null && rawData[9] !== 0xff && rawData[8] !== 0xff && rawData[9] !== 0xaf && rawData[8] !== 0xaf) {
-         // this.addRawDataToQueue(rawData, false);
+      if (rawData != null && rawData.every((byte) => byte === 0xff)) {
+         console.log('End of data transfer');
 
-         const measuresData = {
-            pm1: (((rawData[9] & 0xff) << 8) | (rawData[8] & 0xff)) / 10,
-            pm10: (((rawData[13] & 0xff) << 8) | (rawData[12] & 0xff)) / 10,
-            pm25: (((rawData[11] & 0xff) << 8) | (rawData[10] & 0xff)) / 10,
-            temp: ((rawData[15] & 0xff) << 8) | (rawData[14] & 0xff),
-            hum: ((rawData[17] & 0xff) << 8) | (rawData[16] & 0xff),
-         };
+         if (this.dataloggerPendingData.length > 0) {
+            //TODO: enregistrer en bdd
+            this.dataloggerPendingData = [];
+            console.log('recordNumber:', this.recordNumber);
+            this.recordNumber = 0;
+            this.stopTimerForDataLoggerData();
+         } else {
+            setTimeout(async () => {
+               await this.eraseDataLoggerData();
+            }, 1500);
+            await new Promise((resolve) => setTimeout(resolve, 1700));
+         }
 
-         console.log('Measures Data:', measuresData);
+         this.dataLoggerTransfer = false;
+         this.PMScanObj.isRecording = false;
+      } else if (
+         rawData[0] !== 0xff &&
+         rawData[1] !== 0xff &&
+         rawData[2] !== 0xff &&
+         rawData[3] !== 0xff &&
+         rawData[18] !== 0xaf &&
+         rawData[19] !== 0xaf
+      ) {
+         if (
+            rawData[8] !== 0xff &&
+            rawData[9] !== 0xff &&
+            rawData[10] !== 0xff &&
+            rawData[11] !== 0xff &&
+            rawData[12] !== 0xff &&
+            rawData[13] !== 0xff
+         ) {
+            console.log('addRawDataToQueue');
+            this.dataloggerPendingData.push(rawData);
+            this.recordNumber++;
+
+            if (this.startTime === null) {
+               this.startTime = Date.now();
+            }
+         }
+      }
+   }
+
+   private stopTimerForDataLoggerData(): void {
+      if (this.startTime !== null) {
+         const elapsedTime = (Date.now() - this.startTime) / 1000;
+         console.log(`Data transfer took ${elapsedTime} s`);
+         this.startTime = null;
       }
    }
 
@@ -626,7 +673,6 @@ export class PMScanManager {
                }),
             });
             this.recordId = data.id;
-            console.log('Record created:', data);
          } catch (error) {
             console.error('Error registering record:', error);
             this.showPopup('Error registering record:', false);
@@ -648,6 +694,21 @@ export class PMScanManager {
             console.error('Error updating record:', error);
             this.showPopup('Error updating record:', false);
          }
+      }
+   }
+
+   public async eraseDataLoggerData(): Promise<void> {
+      if (!this.service) return;
+      try {
+         await this.writeMode(0x08, true, false);
+         this.updatePMScanObj({ isRecording: false });
+         await new Promise((resolve) => setTimeout(resolve, 200)); // sleep 200ms
+         await this.writeMode(0x20, false, false);
+         await new Promise((resolve) => setTimeout(resolve, 500)); // sleep 200ms
+         await this.ReadMode();
+      } catch (error) {
+         console.error('Error erasing data logger data:', error);
+         this.showPopup('Error erasing data logger data:', false);
       }
    }
 }

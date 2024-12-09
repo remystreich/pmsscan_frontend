@@ -17,23 +17,44 @@ import {
    AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { AcquisitionIntervalSlider } from '@/components/AcquisitionIntervalSlider/AcquisitionIntervalSlider';
+import AutoFadeModal from '@/components/AutoFadeModal/AutoFadeModal';
+import { LoaderCircle } from 'lucide-react';
 
 const RecordsPage = () => {
-   const { pmscans, mode, PMScanObj, isConnected, startOnlineRecording, stopOnlineRecording } = usePMScanStore();
+   const {
+      pmscans,
+      mode,
+      PMScanObj,
+      isConnected,
+      startOnlineRecording,
+      stopOnlineRecording,
+      startDataloggerRecording,
+      downladDataLoggerData,
+   } = usePMScanStore();
    const { isLoading, error } = usePMScanListFetch();
    const [recordingAction, setRecordingAction] = useState('Start recording');
    const [isDataLoggerSelected, setIsDataLoggerSelected] = useState(true);
+   const [isStartingRecord, setIsStartingRecord] = useState(false);
 
    const handleStartRecording = () => {
-      console.log('Start recording');
-      startOnlineRecording();
+      setIsStartingRecord(true);
+      setTimeout(() => {
+         setIsStartingRecord(false);
+      }, 1500);
 
-      //TODO: Add datalogger recording
+      if (isDataLoggerSelected === true) {
+         startDataloggerRecording();
+      } else {
+         startOnlineRecording();
+      }
    };
 
    const handleRecordingAction = () => {
       if (recordingAction === 'Stop recording') {
          stopOnlineRecording();
+      } else if (recordingAction === 'Stop recording and download' || recordingAction === 'Download') {
+         console.log('Download');
+         downladDataLoggerData();
       }
    };
 
@@ -131,6 +152,10 @@ const RecordsPage = () => {
                ))}
             </div>
          </section>
+         <AutoFadeModal isVisible={isStartingRecord} delay={1500}>
+            <p className="text-xl">Start recording...</p>
+            <LoaderCircle className="size-8 animate-spin" />
+         </AutoFadeModal>
       </>
    );
 };

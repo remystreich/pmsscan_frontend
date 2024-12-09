@@ -152,6 +152,8 @@ const Header = () => {
          return 'Record stopped';
       } else if (mode.memoryEmpty === true && PMScanObj.isRecording === false) {
          return 'Ready';
+      } else if (mode.memoryDownloadRequested === true) {
+         return 'Downloading';
       }
    };
 
