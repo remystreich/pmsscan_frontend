@@ -6,12 +6,10 @@ interface RecordsContentProps {
 }
 
 const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
-   const { response, isLoading, error } = useFetchRecords(pmscanId, 1, 10);
+   const { response, isLoading, error } = useFetchRecords(pmscanId, 1, 20);
 
    if (isLoading) return <div>Chargement des enregistrements...</div>;
    if (error) return <div>Erreur: {error}</div>;
-
-   console.log(response);
 
    return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">

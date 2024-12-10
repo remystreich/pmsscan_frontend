@@ -66,9 +66,11 @@ export const PMScanSettings = () => {
             </div>
          </div>
 
-         <AutoFadeModal isVisible={isErasing} delay={2000}>
-            <p className="text-xl">Erasing datas...</p>
-            <LoaderCircle className="size-8 animate-spin" />
+         <AutoFadeModal isVisible={isErasing}>
+            <div className="flex items-center justify-center gap-1">
+               <p className="text-xl">Erasing datas...</p>
+               <LoaderCircle className="size-8 animate-spin" />
+            </div>
          </AutoFadeModal>
       </section>
    );
