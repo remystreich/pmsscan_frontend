@@ -24,7 +24,7 @@ export class PMScanManager {
    private timerForPendingData: NodeJS.Timeout | null = null;
 
    public dataLoggerTransfer: boolean = false;
-   private dataloggerPendingData: Uint8Array[] = [];
+   private dataloggerPendingData: Uint8Array = new Uint8Array();
 
    //pour online recording, on a besoin de l'id du record en cours, si id ==0 on crée un nouveau record, sinon on ajoute les données à l'id du record
    private recordId: number = 0;
@@ -358,7 +358,6 @@ export class PMScanManager {
       const modeValue = await modeCharacteristic.readValue();
       const uint8 = modeValue.getUint8(0);
       this.updateModeObject(uint8);
-      console.log('Mode:', this.mode);
       this.gattOperationInProgress = false;
    }
 
@@ -428,6 +427,8 @@ export class PMScanManager {
          this.device.gatt.disconnect();
          this.writeMode(0x40, false, false);
          this.PMScanInited = false;
+         this.isOnlineRecording = false;
+         this.updatePMScanObj({ isRecording: false });
       }
    }
 
@@ -515,9 +516,9 @@ export class PMScanManager {
          }
          await modeCharacteristic.writeValueWithResponse(modeToWrite);
          this.updateModeObject(modeToWrite[0]);
-         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (error) {
          if (modeFlags !== 0x80 && modeFlags !== 0x40) {
+            console.error('Error writing mode:', modeFlags, error);
             this.showPopup('Error writing mode', false);
          }
       } finally {
@@ -560,62 +561,40 @@ export class PMScanManager {
       this.pendingData = [];
    }
 
-   private recordNumber: number = 0;
-   private startTime: number | null = null;
+   private isTransferComplete: boolean = false;
 
    private async handleDataLoggerData(value: DataView): Promise<void> {
       const rawData = new Uint8Array(value.buffer);
 
       if (rawData != null && rawData.every((byte) => byte === 0xff)) {
-         console.log('End of data transfer');
-
+         this.isTransferComplete = true;
          if (this.dataloggerPendingData.length > 0) {
-            //TODO: enregistrer en bdd
-            this.dataloggerPendingData = [];
-            console.log('recordNumber:', this.recordNumber);
-            this.recordNumber = 0;
-            this.stopTimerForDataLoggerData();
-         } else {
-            setTimeout(async () => {
-               await this.eraseDataLoggerData();
-            }, 1500);
-            await new Promise((resolve) => setTimeout(resolve, 1700));
+            await this.writeDataLoggerData(this.dataloggerPendingData);
+            this.dataloggerPendingData = new Uint8Array(0);
          }
-
+         await new Promise((resolve) => setTimeout(resolve, 300));
+         await this.eraseDataLoggerData();
          this.dataLoggerTransfer = false;
-         this.PMScanObj.isRecording = false;
       } else if (
          rawData[0] !== 0xff &&
          rawData[1] !== 0xff &&
          rawData[2] !== 0xff &&
          rawData[3] !== 0xff &&
          rawData[18] !== 0xaf &&
-         rawData[19] !== 0xaf
+         rawData[19] !== 0xaf &&
+         rawData[8] !== 0xff &&
+         rawData[9] !== 0xff &&
+         rawData[10] !== 0xff &&
+         rawData[11] !== 0xff &&
+         rawData[12] !== 0xff &&
+         rawData[13] !== 0xff &&
+         this.isTransferComplete === false
       ) {
-         if (
-            rawData[8] !== 0xff &&
-            rawData[9] !== 0xff &&
-            rawData[10] !== 0xff &&
-            rawData[11] !== 0xff &&
-            rawData[12] !== 0xff &&
-            rawData[13] !== 0xff
-         ) {
-            console.log('addRawDataToQueue');
-            this.dataloggerPendingData.push(rawData);
-            this.recordNumber++;
-
-            if (this.startTime === null) {
-               this.startTime = Date.now();
-            }
-         }
-      }
-   }
-
-   private stopTimerForDataLoggerData(): void {
-      if (this.startTime !== null) {
-         const elapsedTime = (Date.now() - this.startTime) / 1000;
-         console.log(`Data transfer took ${elapsedTime} s`);
-         this.startTime = null;
+         this.storeApi?.setState({ isDownloadingDataLogger: true });
+         const newArray = new Uint8Array(this.dataloggerPendingData.length + rawData.length);
+         newArray.set(this.dataloggerPendingData, 0);
+         newArray.set(rawData, this.dataloggerPendingData.length);
+         this.dataloggerPendingData = newArray;
       }
    }
 
@@ -699,16 +678,44 @@ export class PMScanManager {
 
    public async eraseDataLoggerData(): Promise<void> {
       if (!this.service) return;
+
       try {
+         this.storeApi?.setState({ isErasingDataLogger: true });
+         this.storeApi?.setState({ isDownloadingDataLogger: false });
          await this.writeMode(0x08, true, false);
          this.updatePMScanObj({ isRecording: false });
-         await new Promise((resolve) => setTimeout(resolve, 200)); // sleep 200ms
-         await this.writeMode(0x20, false, false);
          await new Promise((resolve) => setTimeout(resolve, 500)); // sleep 200ms
+         await this.writeMode(0x20, false, false);
+         await new Promise((resolve) => setTimeout(resolve, 1000)); // sleep 200ms
          await this.ReadMode();
       } catch (error) {
          console.error('Error erasing data logger data:', error);
          this.showPopup('Error erasing data logger data:', false);
+      } finally {
+         this.storeApi?.setState({ isErasingDataLogger: false });
+         this.isTransferComplete = false;
+      }
+   }
+
+   private async writeDataLoggerData(rawData: Uint8Array): Promise<void> {
+      try {
+         const accessToken = this.getAccessToken();
+         if (!accessToken) {
+            throw new Error('No access token available');
+         }
+
+         const payload = {
+            data: this.uint8ArrayToBase64(rawData),
+            name: this.PMScanObj.deviceName + '-' + new Date().toISOString(),
+         };
+
+         await authFetch(`${API_URL}/records/${this.PMScanObj.databaseId}`, {
+            method: 'POST',
+            body: JSON.stringify(payload),
+         });
+      } catch (error) {
+         console.error('Error registering record:', error);
+         this.showPopup('Error registering record:', false);
       }
    }
 }

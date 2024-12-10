@@ -13,6 +13,8 @@ export interface PMScanState {
    isLoading: boolean;
    error: string | null;
    mode: PMScanMode;
+   isDownloadingDataLogger: boolean;
+   isErasingDataLogger: boolean;
    connect: () => void;
    disconnect: () => void;
    resetToFactory: () => void;
@@ -59,6 +61,8 @@ export const usePMScanStore = create<PMScanState>()(
             memoryEraseRequested: false,
             memoryFull: false,
          },
+         isDownloadingDataLogger: false,
+         isErasingDataLogger: false,
 
          connect: () => {
             const { manager } = usePMScanStore.getState();
@@ -84,9 +88,9 @@ export const usePMScanStore = create<PMScanState>()(
             const { manager } = usePMScanStore.getState();
             await manager.writeMode(0x08, true, false); // stopper enregistrement
             manager.updatePMScanObj({ isRecording: false });
-            await new Promise((resolve) => setTimeout(resolve, 200)); // sleep 200ms
+            await new Promise((resolve) => setTimeout(resolve, 500)); // sleep 500ms
             await manager.writeMode(0x20, false, false); // effacer les données
-            await new Promise((resolve) => setTimeout(resolve, 500)); // sleep 200ms
+            await new Promise((resolve) => setTimeout(resolve, 1000)); // sleep 200ms
             await manager.ReadMode();
          },
 
