@@ -11,13 +11,13 @@ export const useDeleteRecord = () => {
          try {
             const response = await authFetch(`/records/${id}`, {}, 'DELETE');
             if (!response.ok) {
-               throw new Error('Failed to delete PMScan');
+               throw new Error('Failed to delete Record');
             } else {
-               showPopup('success', 'PMScan deleted successfully');
+               showPopup('success', 'Record deleted successfully');
             }
          } catch (error) {
-            console.error('Error in PMScan deletion:', error);
-            showPopup('error', 'Failed to delete PMScan');
+            console.error('Error in Record deletion:', error);
+            showPopup('error', 'Failed to delete Record');
          }
       },
       [authFetch, showPopup],

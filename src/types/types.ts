@@ -53,3 +53,16 @@ export interface User {
    createdAt: string;
    updatedAt: string;
 }
+
+export type RecordData = {
+   id: number;
+   createdAt: string;
+   updatedAt: string;
+   data: {
+      type: string;
+      data: number[];
+   };
+   name: string;
+   type: string;
+   pmScanId: number;
+};

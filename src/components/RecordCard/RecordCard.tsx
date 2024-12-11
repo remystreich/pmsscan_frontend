@@ -5,19 +5,22 @@ type RecordCardProps = {
    measuresCount: number;
    type: string;
    onDelete: () => void;
+   onViewChart: () => void;
 };
 
-export const RecordCard = ({ recordName, measuresCount, type, onDelete }: RecordCardProps) => {
+export const RecordCard = ({ recordName, measuresCount, type, onDelete, onViewChart }: RecordCardProps) => {
    const handleChangeName = () => {
       console.log('Change name');
+      //TODO: Implementer la modification du nom
    };
 
    const handleViewChart = () => {
-      console.log('View chart');
+      onViewChart();
    };
 
    const handleExportCSV = () => {
       console.log('Export to CSV');
+      //TODO: Implementer l'export en CSV
    };
 
    const handleDelete = () => {
