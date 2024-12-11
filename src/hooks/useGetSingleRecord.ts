@@ -22,6 +22,7 @@ export const useGetSingleRecord = () => {
                const fetchedData: RecordData = await response.json();
                setData(fetchedData);
                setError(null);
+               return fetchedData;
             }
          } catch (error) {
             console.error('Error in getting record:', error);

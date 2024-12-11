@@ -1,7 +1,6 @@
 import ReactEcharts from 'echarts-for-react';
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import { RecordData } from '@/types/types';
-import { set } from 'react-hook-form';
 import { CircleX } from 'lucide-react';
 
 type PMData = {
@@ -20,15 +19,17 @@ type ChartModalProps = {
    recordData: RecordData;
    isVisible: boolean;
    onClose: () => void;
+   loading: boolean;
 };
 
-export const ChartModal: FC<ChartModalProps> = ({ recordData, isVisible, onClose }) => {
+export const ChartModal: FC<ChartModalProps> = ({ recordData, isVisible, onClose, loading }) => {
    const [pmData, setPmData] = useState<PMData>({
       pm1: [],
       pm25: [],
       pm10: [],
    });
    const [name, setName] = useState<string>('');
+   const chartRef = useRef<ReactEcharts | null>(null);
 
    useEffect(() => {
       setName(recordData.name);
@@ -64,7 +65,6 @@ export const ChartModal: FC<ChartModalProps> = ({ recordData, isVisible, onClose
          pm25: newPm25Data,
          pm10: newPm10Data,
       });
-      console.log('pmData', pmData);
    }, [recordData]);
 
    const getOption = () => ({
@@ -147,7 +147,16 @@ export const ChartModal: FC<ChartModalProps> = ({ recordData, isVisible, onClose
             <button onClick={onClose} className="absolute right-3 top-2">
                <CircleX />
             </button>
-            <ReactEcharts option={getOption()} style={{ height: '500px' }} opts={{ renderer: 'svg' }} />
+            {loading ? (
+               <div>Loading...</div>
+            ) : (
+               <ReactEcharts
+                  ref={chartRef}
+                  option={getOption()}
+                  style={{ height: '500px', width: '100%' }}
+                  opts={{ renderer: 'svg' }}
+               />
+            )}
          </div>
       </div>
    );

@@ -5,6 +5,7 @@ import { useDeleteRecord } from '@/hooks/useDeleteRecord';
 import { ChartModal } from '@/components/ChartModal/ChartModal';
 import { RecordData } from '@/types/types';
 import { useGetSingleRecord } from '@/hooks/useGetSingleRecord';
+import { usePopupStore } from '@/stores/popupStore';
 
 interface RecordsContentProps {
    pmscanId: number;
@@ -33,7 +34,8 @@ interface ResponseType {
 const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
    const { response, isLoading, error } = useFetchRecords<ResponseType>(pmscanId, 1, 20);
    const deleteRecord = useDeleteRecord();
-   const { fetchRecord, data, loading: singleRecordLoading, error: singleRecordError } = useGetSingleRecord();
+   const { fetchRecord, loading: chartLoading, error: chartError } = useGetSingleRecord();
+   const showPopup = usePopupStore((state) => state.showPopup);
 
    const [records, setRecords] = useState<Record[]>([]);
    const [isChartVisible, setIsChartVisible] = useState(false);
@@ -62,17 +64,16 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
    };
 
    const handleViewChart = async (id: number) => {
-      await fetchRecord(id);
+      const fetchedData = await fetchRecord(id);
       // setPmDataForChart(data);
-      if (data == null) return;
-      setRecordData(data);
-      setIsChartVisible(true);
+      if (chartError) {
+         showPopup('error', chartError);
+         return;
+      }
 
-      // const buffer = new Uint8Array(data.data.data);
-      // const segments = [];
-      // for (let i = 0; i < buffer.length; i += 20) {
-      //    segments.push(buffer.slice(i, i + 20));
-      // }
+      if (fetchedData == null) return;
+      setRecordData(fetchedData);
+      setIsChartVisible(true);
    };
 
    const onChartClose = () => {
@@ -96,7 +97,9 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
                />
             ))}
          </div>
-         <ChartModal recordData={recordData} isVisible={isChartVisible} onClose={onChartClose} />
+         {isChartVisible && (
+            <ChartModal recordData={recordData} isVisible={isChartVisible} onClose={onChartClose} loading={chartLoading} />
+         )}
       </>
    );
 };
