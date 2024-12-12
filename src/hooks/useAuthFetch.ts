@@ -26,6 +26,8 @@ export const useAuthFetch = () => {
 
          const headers = {
             ...options.headers,
+            'Content-Type': 'application/json',
+            accept: 'application/json',
             Authorization: `Bearer ${accessToken}`,
          };
 

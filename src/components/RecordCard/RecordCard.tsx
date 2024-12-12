@@ -7,12 +7,20 @@ type RecordCardProps = {
    onDelete: () => void;
    onViewChart: () => void;
    onExportCSV: () => void;
+   onEditName: () => void;
 };
 
-export const RecordCard = ({ recordName, measuresCount, type, onDelete, onViewChart, onExportCSV }: RecordCardProps) => {
+export const RecordCard = ({
+   recordName,
+   measuresCount,
+   type,
+   onDelete,
+   onViewChart,
+   onExportCSV,
+   onEditName,
+}: RecordCardProps) => {
    const handleChangeName = () => {
-      console.log('Change name');
-      //TODO: Implementer la modification du nom
+      onEditName();
    };
 
    const handleViewChart = () => {
