@@ -6,6 +6,7 @@ import { ChartModal } from '@/components/ChartModal/ChartModal';
 import { RecordData } from '@/types/types';
 import { useGetSingleRecord } from '@/hooks/useGetSingleRecord';
 import { usePopupStore } from '@/stores/popupStore';
+import { useExportToCsv } from '@/hooks/useExportToCsv';
 
 interface RecordsContentProps {
    pmscanId: number;
@@ -36,6 +37,7 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
    const deleteRecord = useDeleteRecord();
    const { fetchRecord, loading: chartLoading, error: chartError } = useGetSingleRecord();
    const showPopup = usePopupStore((state) => state.showPopup);
+   const exportToCsv = useExportToCsv();
 
    const [records, setRecords] = useState<Record[]>([]);
    const [isChartVisible, setIsChartVisible] = useState(false);
@@ -62,6 +64,10 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
       await deleteRecord(id);
       setRecords((prev) => prev.filter((record) => record.id !== id));
    };
+
+   const handleExportToCSV = async (id: number) => {
+      await exportToCsv(id);
+   }
 
    const handleViewChart = async (id: number) => {
       const fetchedData = await fetchRecord(id);
@@ -94,6 +100,7 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
                   type={record.type}
                   onDelete={() => handleDelete(record.id)}
                   onViewChart={() => handleViewChart(record.id)}
+                  onExportCSV={() => handleExportToCSV(record.id)}
                />
             ))}
          </div>

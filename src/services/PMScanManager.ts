@@ -6,7 +6,6 @@ import { API_URL } from '@/utils/constants';
 import { uint8ArrayToBase64 } from '@/utils/functions';
 import { authFetch } from '@/utils/authFetch';
 import { usePopupStore } from '@/stores/popupStore';
-import { date } from 'zod';
 
 export class PMScanManager {
    private device: BluetoothDevice | null = null;
