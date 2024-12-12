@@ -97,16 +97,26 @@ const RecordsPage = () => {
    useEffect(() => {
       let intervalId: NodeJS.Timeout;
 
-      if (progressValue >= 100) {
-         setIsDownloading(false);
-         return;
-      }
-
       if (isRunning) {
+         if (progressValue >= 100) {
+            setIsRunning(false);
+            setIsDownloading(false);
+            return;
+         }
+
          intervalId = setInterval(() => {
-            setProgressValue((prev) => prev + 1);
+            setProgressValue((prev) => {
+               const newValue = prev + 1;
+               if (newValue >= 100) {
+                  clearInterval(intervalId);
+                  setIsRunning(false);
+                  setIsDownloading(false);
+                  return 100;
+               }
+               return newValue;
+            });
          }, 919);
-      }
+      } //TODO: changer le temps pour 6400 echantillons
 
       return () => {
          if (intervalId) {
@@ -117,8 +127,8 @@ const RecordsPage = () => {
 
    return (
       <>
-         <section>
-            <div className="flex items-center justify-between px-2">
+         <section className="px-5 py-2">
+            <div className="flex items-center justify-between">
                <h1 className="p-2 text-3xl font-bold lg:p-4">Records</h1>
                <RecordingButton
                   recordingAction={recordingAction}

@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { useAuthFetch } from '@/hooks/useAuthFetch';
 import { useAuthStore } from '@/stores/authStore';
 
-export const useFetchRecords = (pmscanId: number, page: number, limit: number) => {
+export const useFetchRecords = <T,>(pmscanId: number, page: number, limit: number) => {
    const { authFetch } = useAuthFetch();
    const accessToken = useAuthStore((state) => state.accessToken);
    const [isLoading, setIsLoading] = useState(false);
    const [error, setError] = useState<string | null>(null);
-   const [response, setResponse] = useState<unknown | null>(null);
+   const [response, setResponse] = useState<T | null>(null);
 
    useEffect(() => {
       const fetchRecords = async () => {

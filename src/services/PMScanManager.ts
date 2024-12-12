@@ -563,6 +563,9 @@ export class PMScanManager {
 
    private isTransferComplete: boolean = false;
 
+   // private timer: Date | null = null; TODO: Remove this
+   // private startTime: number | null = null;
+
    private async handleDataLoggerData(value: DataView): Promise<void> {
       const rawData = new Uint8Array(value.buffer);
 
@@ -575,6 +578,13 @@ export class PMScanManager {
          await new Promise((resolve) => setTimeout(resolve, 300));
          await this.eraseDataLoggerData();
          this.dataLoggerTransfer = false;
+
+         // if (this.startTime) {
+         //    const endTime = Date.now();
+         //    const duration = endTime - this.startTime;
+         //    console.log(`Durée du transfert : ${duration / 1000} s`);
+         //    this.startTime = null;
+         // }
       } else if (
          rawData[0] !== 0xff &&
          rawData[1] !== 0xff &&
@@ -590,6 +600,12 @@ export class PMScanManager {
          rawData[13] !== 0xff &&
          this.isTransferComplete === false
       ) {
+         // console.log('data received');
+         // if (this.timer == null) {
+         //    this.timer = new Date();
+         //    this.startTime = Date.now();
+         // }
+
          this.storeApi?.setState({ isDownloadingDataLogger: true });
          const newArray = new Uint8Array(this.dataloggerPendingData.length + rawData.length);
          newArray.set(this.dataloggerPendingData, 0);
@@ -648,7 +664,8 @@ export class PMScanManager {
                method: 'POST',
                body: JSON.stringify({
                   data: this.uint8ArrayToBase64(rawData),
-                  name: this.PMScanObj.deviceName + '-' + new Date().toISOString(),
+                  name: this.PMScanObj.deviceName + '-' + new Date().toISOString().split('.')[0].replace('T', ' '),
+                  type: 'Local record',
                }),
             });
             this.recordId = data.id;
@@ -706,7 +723,8 @@ export class PMScanManager {
 
          const payload = {
             data: this.uint8ArrayToBase64(rawData),
-            name: this.PMScanObj.deviceName + '-' + new Date().toISOString(),
+            name: this.PMScanObj.deviceName + '-' + new Date().toISOString().split('.')[0].replace('T', ' '),
+            type: 'Datalogger record',
          };
 
          await authFetch(`${API_URL}/records/${this.PMScanObj.databaseId}`, {
