@@ -7,6 +7,7 @@ import { RecordData } from '@/types/types';
 import { useGetSingleRecord } from '@/hooks/useGetSingleRecord';
 import { usePopupStore } from '@/stores/popupStore';
 import { useExportToCsv } from '@/hooks/useExportToCsv';
+import { ChangeRecordNameModal } from '@/components/ChangeRecordNameModal/ChangeRecordNameModal';
 
 interface RecordsContentProps {
    pmscanId: number;
@@ -54,6 +55,10 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
       pmScanId: 0,
    });
 
+   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+   const [recordIdToEdit, setRecordIdToEdit] = useState(0);
+   const [recordNameToEdit, setRecordNameToEdit] = useState('');
+
    useEffect(() => {
       if (response?.records) {
          setRecords(response.records);
@@ -67,7 +72,7 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
 
    const handleExportToCSV = async (id: number) => {
       await exportToCsv(id);
-   }
+   };
 
    const handleViewChart = async (id: number) => {
       const fetchedData = await fetchRecord(id);
@@ -80,6 +85,16 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
       if (fetchedData == null) return;
       setRecordData(fetchedData);
       setIsChartVisible(true);
+   };
+
+   const handleEditName = (name: string, id: number) => {
+      setRecordNameToEdit(name);
+      setRecordIdToEdit(id);
+      setIsEditModalVisible(true);
+   };
+
+   const handleRecordUpdate = (recordId: number, newName: string) => {
+      setRecords((prevRecords) => prevRecords?.map((record) => (record.id === recordId ? { ...record, name: newName } : record)));
    };
 
    const onChartClose = () => {
@@ -101,11 +116,24 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
                   onDelete={() => handleDelete(record.id)}
                   onViewChart={() => handleViewChart(record.id)}
                   onExportCSV={() => handleExportToCSV(record.id)}
+                  onEditName={() => {
+                     handleEditName(record.name, record.id);
+                  }}
                />
             ))}
          </div>
          {isChartVisible && (
             <ChartModal recordData={recordData} isVisible={isChartVisible} onClose={onChartClose} loading={chartLoading} />
+         )}
+         {isEditModalVisible && (
+            <div className="fixed inset-0 z-50 flex h-screen w-screen items-center justify-center bg-black/80">
+               <ChangeRecordNameModal
+                  recordName={recordNameToEdit}
+                  recordId={recordIdToEdit}
+                  onClose={() => setIsEditModalVisible(false)}
+                  onSuccess={handleRecordUpdate}
+               />
+            </div>
          )}
       </>
    );
