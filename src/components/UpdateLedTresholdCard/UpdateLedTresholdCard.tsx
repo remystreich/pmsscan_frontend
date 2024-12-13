@@ -124,7 +124,7 @@ export const UpdateLedTresholdCard = () => {
             <CardTitle>Led Intensity</CardTitle>
          </CardHeader>
          <CardContent className="relative">
-            <div className={`absolute size-full bg-white opacity-50 ${isConnected ? 'hidden' : ''}`}></div>
+            <div className={`absolute inset-0 size-full bg-white opacity-50 ${isConnected ? 'hidden' : ''}`}></div>
             <Form {...form}>
                <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-2 lg:gap-4">
                   <FormField

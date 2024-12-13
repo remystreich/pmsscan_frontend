@@ -261,7 +261,7 @@ export const RealTimeView = () => {
 
    return (
       <section className="z-0 p-2">
-         <div className="flex items-center gap-4 lg:m-4">
+         <div className="flex items-center gap-1 md:gap-4 lg:m-4">
             <Button
                variant={activeButton === '1m' ? 'default' : 'secondary'}
                onClick={() => handleTimeSelect('1m')}

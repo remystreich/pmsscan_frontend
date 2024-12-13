@@ -33,7 +33,7 @@ export const PMScanSettings = () => {
    };
 
    return (
-      <section className="relative">
+      <section className="relative p-1">
          <h1 className="p-2 text-3xl font-bold lg:p-4">PMcan settings</h1>
          <div className="flex flex-col gap-4 p-2 lg:p-4">
             <InfoPMScanCard />
