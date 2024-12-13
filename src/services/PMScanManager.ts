@@ -27,7 +27,7 @@ export class PMScanManager {
    private dataloggerPendingData: Uint8Array = new Uint8Array();
 
    //pour online recording, on a besoin de l'id du record en cours, si id ==0 on crée un nouveau record, sinon on ajoute les données à l'id du record
-   private recordId: number = 0;
+   public recordId: number = 0;
 
    public PMScanObj: PMScanObjType = {
       name: 'PMScanXXXXXX',
@@ -225,10 +225,12 @@ export class PMScanManager {
                if (!accessToken) {
                   throw new Error('No access token available');
                }
-               const data = await authFetch(`${API_URL}/pmscan`, {
+               const response = await authFetch(`${API_URL}/pmscan`, {
                   method: 'POST',
                   body: JSON.stringify(payload),
                });
+
+               const data = await response.json();
 
                if (data.display && data.display.type === 'Buffer') {
                   data.display = new Uint8Array(data.display.data);
@@ -247,13 +249,16 @@ export class PMScanManager {
       if (!this.storeApi) return;
       const { setPMScans } = this.storeApi.getState();
       try {
-         const data = await authFetch(`${API_URL}/pmscan`);
+         const response = await authFetch(`${API_URL}/pmscan`);
+
+         const data = await response.json();
 
          for (let i = 0; i < data.length; i++) {
             if (data[i].display && data[i].display.type === 'Buffer') {
                data[i].display = new Uint8Array(data[i].display.data);
             }
          }
+
          setPMScans(data);
       } catch (error) {
          console.error('Error fetching PMScans:', error);
@@ -368,7 +373,7 @@ export class PMScanManager {
 
       const PMScanDisplayUUID = 'f364190a-00b0-4240-ba50-05ca45bf8abc';
       const displayCharacteristic = await this.service.getCharacteristic(PMScanDisplayUUID);
-      await displayCharacteristic.writeValueWithResponse(this.PMScanObj.display); //TODO: Récupérer en bdd
+      await displayCharacteristic.writeValueWithResponse(this.PMScanObj.display);
       const displayValue = await displayCharacteristic.readValue();
       const display = new Uint8Array(displayValue.buffer);
       this.updatePMScanObj({ display: display });
@@ -660,7 +665,7 @@ export class PMScanManager {
             if (!accessToken) {
                throw new Error('No access token available');
             }
-            const data = await authFetch(`${API_URL}/records/${this.PMScanObj.databaseId}`, {
+            const response = await authFetch(`${API_URL}/records/${this.PMScanObj.databaseId}`, {
                method: 'POST',
                body: JSON.stringify({
                   data: this.uint8ArrayToBase64(rawData),
@@ -668,6 +673,8 @@ export class PMScanManager {
                   type: 'Local record',
                }),
             });
+            const data = await response.json();
+
             this.recordId = data.id;
          } catch (error) {
             console.error('Error registering record:', error);

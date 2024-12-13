@@ -1,48 +1,32 @@
-import { useFetchRecords } from '@/hooks/useFetchRecords';
 import { RecordCard } from '@/components/RecordCard/RecordCard';
 import { useEffect, useState } from 'react';
-import { useDeleteRecord } from '@/hooks/useDeleteRecord';
 import { ChartModal } from '@/components/ChartModal/ChartModal';
 import { RecordData } from '@/types/types';
-import { useGetSingleRecord } from '@/hooks/useGetSingleRecord';
-import { usePopupStore } from '@/stores/popupStore';
-import { useExportToCsv } from '@/hooks/useExportToCsv';
 import { ChangeRecordNameModal } from '@/components/ChangeRecordNameModal/ChangeRecordNameModal';
 import { Button } from '@/components/ui/button';
+import { useRecordStore } from '@/stores/recordsStore';
 
 interface RecordsContentProps {
    pmscanId: number;
 }
 
-interface Record {
-   id: number;
-   name: string;
-   pmScanId: number;
-   createdAt: string;
-   updatedAt: string;
-   type: string;
-   measuresCount: number;
-}
-interface Meta {
-   total: number;
-   page: number;
-   limit: number;
-   totalPages: number;
-}
-interface ResponseType {
-   records: Record[];
-   meta: Meta;
-}
-
 const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
    const [currentPage, setCurrentPage] = useState(1);
-   const { response, isLoading, error } = useFetchRecords<ResponseType>(pmscanId, currentPage, 20);
-   const deleteRecord = useDeleteRecord();
-   const { fetchRecord, loading: chartLoading, error: chartError } = useGetSingleRecord();
-   const showPopup = usePopupStore((state) => state.showPopup);
-   const exportToCsv = useExportToCsv();
 
-   const [records, setRecords] = useState<Record[]>([]);
+   const {
+      records,
+      loading,
+      error,
+      fetchRecords,
+      reset,
+      meta,
+      deleteRecord,
+      singleRecordLoading,
+      singleRecordError,
+      getSingleRecord,
+      exportToCsv,
+   } = useRecordStore();
+
    const [isChartVisible, setIsChartVisible] = useState(false);
    const [recordData, setRecordData] = useState<RecordData>({
       id: 0,
@@ -62,14 +46,15 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
    const [recordNameToEdit, setRecordNameToEdit] = useState('');
 
    useEffect(() => {
-      if (response?.records) {
-         setRecords(response.records);
-      }
-   }, [response]);
+      fetchRecords(pmscanId, currentPage, 20);
+
+      // return () => {
+      //    reset();
+      // };
+   }, [pmscanId, currentPage, fetchRecords, reset]);
 
    const handleDelete = async (id: number) => {
       await deleteRecord(id);
-      setRecords((prev) => prev.filter((record) => record.id !== id));
    };
 
    const handleExportToCSV = async (id: number) => {
@@ -77,14 +62,11 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
    };
 
    const handleViewChart = async (id: number) => {
-      const fetchedData = await fetchRecord(id);
-      // setPmDataForChart(data);
-      if (chartError) {
-         showPopup('error', chartError);
+      const fetchedData = await getSingleRecord(id);
+      if (singleRecordError || fetchedData == null) {
          return;
       }
 
-      if (fetchedData == null) return;
       setRecordData(fetchedData);
       setIsChartVisible(true);
    };
@@ -95,10 +77,6 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
       setIsEditModalVisible(true);
    };
 
-   const handleRecordUpdate = (recordId: number, newName: string) => {
-      setRecords((prevRecords) => prevRecords?.map((record) => (record.id === recordId ? { ...record, name: newName } : record)));
-   };
-
    const onChartClose = () => {
       setIsChartVisible(false);
    };
@@ -107,7 +85,7 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
       setCurrentPage(newPage);
    };
 
-   if (isLoading) return <div>Chargement des enregistrements...</div>;
+   if (loading) return <div>Loading records...</div>;
    if (error) return <div>Erreur: {error}</div>;
 
    return (
@@ -129,22 +107,22 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
             ))}
          </div>
 
-         {response?.meta && (
+         {meta && (
             <div className="mt-4 flex items-center justify-center gap-2">
                <Button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
                   Previous
                </Button>
                <span>
-                  Page {currentPage} of {response.meta.totalPages}
+                  Page {currentPage} of {meta.totalPages}
                </span>
-               <Button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === response.meta.totalPages}>
+               <Button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === meta.totalPages}>
                   Next
                </Button>
             </div>
          )}
 
          {isChartVisible && (
-            <ChartModal recordData={recordData} isVisible={isChartVisible} onClose={onChartClose} loading={chartLoading} />
+            <ChartModal recordData={recordData} isVisible={isChartVisible} onClose={onChartClose} loading={singleRecordLoading} />
          )}
          {isEditModalVisible && (
             <div className="fixed inset-0 z-50 flex h-screen w-screen items-center justify-center bg-black/80">
@@ -152,7 +130,6 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
                   recordName={recordNameToEdit}
                   recordId={recordIdToEdit}
                   onClose={() => setIsEditModalVisible(false)}
-                  onSuccess={handleRecordUpdate}
                />
             </div>
          )}

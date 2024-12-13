@@ -66,3 +66,13 @@ export type RecordData = {
    type: string;
    pmScanId: number;
 };
+
+export type Record = {
+   id: number;
+   name: string;
+   pmScanId: number;
+   createdAt: string;
+   updatedAt: string;
+   type: string;
+   measuresCount: number;
+};

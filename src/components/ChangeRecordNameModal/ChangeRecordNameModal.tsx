@@ -5,9 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useAuthFetch } from '@/hooks/useAuthFetch';
-import { usePopupStore } from '@/stores/popupStore';
 import { CircleX } from 'lucide-react';
+import { useRecordStore } from '@/stores/recordsStore';
 
 const formSchema = z.object({
    name: z.string().min(3, 'Name must be at least 3 characters').max(255),
@@ -17,12 +16,10 @@ type UpdateDeviceNameCardProps = {
    recordName: string;
    recordId: number;
    onClose: () => void;
-   onSuccess: (recordId: number, newName: string) => void;
 };
 
-export const ChangeRecordNameModal = ({ recordName, recordId, onClose, onSuccess }: UpdateDeviceNameCardProps) => {
-   const { authFetch } = useAuthFetch();
-   const showPopup = usePopupStore((state) => state.showPopup);
+export const ChangeRecordNameModal = ({ recordName, recordId, onClose }: UpdateDeviceNameCardProps) => {
+   const { updateRecordName } = useRecordStore();
 
    const form = useForm<z.infer<typeof formSchema>>({
       resolver: zodResolver(formSchema),
@@ -33,27 +30,8 @@ export const ChangeRecordNameModal = ({ recordName, recordId, onClose, onSuccess
    });
 
    const onSubmit = async (values: z.infer<typeof formSchema>) => {
-      try {
-         const response = await authFetch(
-            `/records/update-record-name/${recordId}`,
-            {
-               body: JSON.stringify(values),
-            },
-            'PATCH',
-         );
-         if (response.ok) {
-            showPopup('success', 'Name updated successfully');
-            onSuccess(recordId, values.name);
-            onClose();
-         } else {
-            onClose();
-            const data = await response.json();
-            throw new Error(data.message);
-         }
-      } catch (error) {
-         console.error('Error in updating name:', error);
-         showPopup('error', 'Failed to update name');
-      }
+      await updateRecordName(recordId, values.name);
+      onClose();
    };
 
    return (
