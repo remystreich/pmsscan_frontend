@@ -115,7 +115,10 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
                <span>
                   Page {currentPage} of {meta.totalPages}
                </span>
-               <Button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === meta.totalPages}>
+               <Button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === meta.totalPages || meta.totalPages === 0}
+               >
                   Next
                </Button>
             </div>

@@ -145,14 +145,19 @@ const RecordsPage = () => {
       <>
          <section className="px-5 py-2">
             <h1 className="p-2 text-3xl font-bold lg:p-4">Records</h1>
-            <div className="my-4 flex items-center justify-between">
-               <DatePicker />
-               <RecordingButton
-                  recordingAction={recordingAction}
-                  isConnected={isConnected}
-                  onStartRecording={handleStartRecording}
-                  onRecordingAction={handleRecordingAction}
-               />
+            <div className="my-4 flex flex-col items-start justify-center gap-2 md:flex-row md:items-center md:justify-between">
+               <div className="order-2 m-0 w-full p-0 md:order-1 md:w-fit">
+                  <DatePicker />
+               </div>
+
+               <div className="order-1 m-0 flex w-full justify-end p-0 md:order-2 md:w-fit">
+                  <RecordingButton
+                     recordingAction={recordingAction}
+                     isConnected={isConnected}
+                     onStartRecording={handleStartRecording}
+                     onRecordingAction={handleRecordingAction}
+                  />
+               </div>
             </div>
             <div>
                {isLoading && <div>Loading...</div>}
