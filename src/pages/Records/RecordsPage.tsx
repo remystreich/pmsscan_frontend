@@ -7,6 +7,8 @@ import { useEffect, useState } from 'react';
 import RecordsContent from '@/components/RecordsContent/RecordsContent';
 import AutoFadeModal from '@/components/AutoFadeModal/AutoFadeModal';
 import RecordingButton from '@/components/RecordingButton/RecordingButton';
+import { useRecordStore } from '@/stores/recordsStore';
+import { DatePicker } from '@/components/DatePicker/DatePicker';
 
 const RecordsPage = () => {
    const {
@@ -21,6 +23,8 @@ const RecordsPage = () => {
       isDownloadingDataLogger,
       isErasingDataLogger,
    } = usePMScanStore();
+
+   const { refreshRecords } = useRecordStore();
 
    const { isLoading, error } = usePMScanListFetch();
    const [recordingAction, setRecordingAction] = useState('Start recording');
@@ -41,6 +45,9 @@ const RecordsPage = () => {
    const handleRecordingAction = () => {
       if (recordingAction === 'Stop recording') {
          stopOnlineRecording();
+         setTimeout(() => {
+            refreshRecords();
+         }, 500);
       } else if (recordingAction === 'Stop recording and download' || recordingAction === 'Download') {
          setIsDownloading(true);
          setProgressValue(0);
@@ -48,6 +55,14 @@ const RecordsPage = () => {
          downladDataLoggerData();
       }
    };
+
+   // useEffect(() => {
+   //    console.log('RecordsDays', recordsDays);
+   // }, [recordsDays]);
+
+   // useEffect(() => {
+   //    getRecordsDays();
+   // }, [getRecordsDays]);
 
    useEffect(() => {
       if (isConnected === false) {
@@ -90,9 +105,10 @@ const RecordsPage = () => {
             setProgressValue(100);
             setIsRunning(false);
             setDownloadState('Downloading');
+            refreshRecords();
          }, 3000);
       }
-   }, [isDownloadingDataLogger, isErasingDataLogger]);
+   }, [isDownloadingDataLogger, isErasingDataLogger, refreshRecords]);
 
    useEffect(() => {
       let intervalId: NodeJS.Timeout;
@@ -128,8 +144,9 @@ const RecordsPage = () => {
    return (
       <>
          <section className="px-5 py-2">
-            <div className="flex items-center justify-between">
-               <h1 className="p-2 text-3xl font-bold lg:p-4">Records</h1>
+            <h1 className="p-2 text-3xl font-bold lg:p-4">Records</h1>
+            <div className="my-4 flex items-center justify-between">
+               <DatePicker />
                <RecordingButton
                   recordingAction={recordingAction}
                   isConnected={isConnected}
@@ -140,16 +157,16 @@ const RecordsPage = () => {
             <div>
                {isLoading && <div>Loading...</div>}
                {error && <div>Error: {error}</div>}
-               {pmscans.map((pmscan: PMScan) => (
-                  <Accordion key={pmscan.id} type="single" collapsible>
-                     <AccordionItem value={pmscan.deviceName}>
+               <Accordion type="single" collapsible className="w-full">
+                  {pmscans.map((pmscan: PMScan) => (
+                     <AccordionItem key={pmscan.id} value={pmscan.deviceName}>
                         <AccordionTrigger> {pmscan.name} </AccordionTrigger>
                         <AccordionContent>
                            <RecordsContent pmscanId={pmscan.id} />
                         </AccordionContent>
                      </AccordionItem>
-                  </Accordion>
-               ))}
+                  ))}
+               </Accordion>
             </div>
          </section>
 

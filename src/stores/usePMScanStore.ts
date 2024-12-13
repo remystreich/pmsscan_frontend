@@ -106,6 +106,7 @@ export const usePMScanStore = create<PMScanState>()(
             const { manager } = usePMScanStore.getState();
             manager.isOnlineRecording = false;
             manager.updatePMScanObj({ isRecording: false });
+            manager.recordId = 0;
          },
          startDataloggerRecording: () => {
             const { manager } = usePMScanStore.getState();

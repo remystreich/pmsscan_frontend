@@ -43,10 +43,5 @@ export async function authFetch(url: string, options: RequestInit = {}) {
       });
    }
 
-   if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-   }
-
-   return response.json();
+   return response;
 }
-
