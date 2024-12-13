@@ -28,10 +28,12 @@ const RecordingButton = ({ recordingAction, isConnected, onStartRecording, onRec
 
    const handleStartRecording = () => {
       onStartRecording(isDataLoggerSelected);
-      setIsStartingRecord(true);
-      setTimeout(() => {
-         setIsStartingRecord(false);
-      }, 2500);
+      if (isDataLoggerSelected) {
+         setIsStartingRecord(true);
+         setTimeout(() => {
+            setIsStartingRecord(false);
+         }, 2500);
+      }
    };
 
    return recordingAction === 'Start recording' ? (

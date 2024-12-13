@@ -8,6 +8,7 @@ import { useGetSingleRecord } from '@/hooks/useGetSingleRecord';
 import { usePopupStore } from '@/stores/popupStore';
 import { useExportToCsv } from '@/hooks/useExportToCsv';
 import { ChangeRecordNameModal } from '@/components/ChangeRecordNameModal/ChangeRecordNameModal';
+import { Button } from '@/components/ui/button';
 
 interface RecordsContentProps {
    pmscanId: number;
@@ -34,7 +35,8 @@ interface ResponseType {
 }
 
 const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
-   const { response, isLoading, error } = useFetchRecords<ResponseType>(pmscanId, 1, 20);
+   const [currentPage, setCurrentPage] = useState(1);
+   const { response, isLoading, error } = useFetchRecords<ResponseType>(pmscanId, currentPage, 20);
    const deleteRecord = useDeleteRecord();
    const { fetchRecord, loading: chartLoading, error: chartError } = useGetSingleRecord();
    const showPopup = usePopupStore((state) => state.showPopup);
@@ -101,12 +103,16 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
       setIsChartVisible(false);
    };
 
+   const handlePageChange = (newPage: number) => {
+      setCurrentPage(newPage);
+   };
+
    if (isLoading) return <div>Chargement des enregistrements...</div>;
    if (error) return <div>Erreur: {error}</div>;
 
    return (
       <>
-         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+         <div className="mb-10 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
             {records.map((record) => (
                <RecordCard
                   key={record.id}
@@ -122,6 +128,21 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
                />
             ))}
          </div>
+
+         {response?.meta && (
+            <div className="mt-4 flex items-center justify-center gap-2">
+               <Button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1}>
+                  Previous
+               </Button>
+               <span>
+                  Page {currentPage} of {response.meta.totalPages}
+               </span>
+               <Button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === response.meta.totalPages}>
+                  Next
+               </Button>
+            </div>
+         )}
+
          {isChartVisible && (
             <ChartModal recordData={recordData} isVisible={isChartVisible} onClose={onChartClose} loading={chartLoading} />
          )}
