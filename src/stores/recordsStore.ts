@@ -3,7 +3,6 @@ import { create } from 'zustand';
 import { authFetch } from '@/utils/authFetch';
 import { API_URL } from '@/utils/constants';
 import { usePopupStore } from '@/stores/popupStore';
-import { date } from 'zod';
 
 interface RecordsResponse {
    records: Record[];
