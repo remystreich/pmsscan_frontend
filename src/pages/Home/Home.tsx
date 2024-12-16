@@ -2,7 +2,7 @@ import { usePMScanListFetch } from '@/hooks/usePMScanListFetch';
 import PMScanCard from '@/components/PMScanCard/PMScanCard';
 import { PMScan } from '@/types/types';
 
-const Home = () => {
+export const Home = () => {
    const { pmscans, isLoading, error } = usePMScanListFetch();
 
    if (isLoading) {

@@ -20,7 +20,7 @@ import { LoaderCircle } from 'lucide-react';
 import { useState } from 'react';
 import AutoFadeModal from '@/components/AutoFadeModal/AutoFadeModal';
 
-export const PMScanSettings = () => {
+const PMScanSettings = () => {
    const { resetToFactory, eraseDataLoggerData, isConnected } = usePMScanStore();
    const [isErasing, setIsErasing] = useState(false);
 
@@ -75,3 +75,5 @@ export const PMScanSettings = () => {
       </section>
    );
 };
+
+export default PMScanSettings;
