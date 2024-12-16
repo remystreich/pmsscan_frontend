@@ -13,7 +13,7 @@ interface DataZoomEvent {
    batch?: { start: number; end: number }[];
 }
 
-export const RealTimeView = () => {
+const RealTimeView = () => {
    const { datasForChart, PMScanObj } = usePMScanStore();
    const [pmData, setPmData] = useState<PMData>({
       pm1: [[0, 0]],
@@ -308,3 +308,5 @@ export const RealTimeView = () => {
       </section>
    );
 };
+
+export default RealTimeView;
