@@ -121,7 +121,7 @@ export const UpdateLedTresholdCard = () => {
    return (
       <Card>
          <CardHeader>
-            <CardTitle>Led Intensity</CardTitle>
+            <CardTitle>Led treshold</CardTitle>
          </CardHeader>
          <CardContent className="relative">
             <div className={`absolute inset-0 size-full bg-white opacity-50 ${isConnected ? 'hidden' : ''}`}></div>

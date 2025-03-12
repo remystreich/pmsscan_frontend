@@ -87,6 +87,7 @@ const RecordsContent = ({ pmscanId }: RecordsContentProps) => {
 
    if (loading) return <div>Loading records...</div>;
    if (error) return <div>Erreur: {error}</div>;
+   if (!records) return <div>Aucun enregistrement trouvé</div>;
 
    return (
       <>
