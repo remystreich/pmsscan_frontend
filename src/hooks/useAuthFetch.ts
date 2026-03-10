@@ -11,6 +11,7 @@ export const useAuthFetch = () => {
    const authFetch = useCallback(
       async (url: string, options: RequestInit = {}, method: string) => {
          // Attendre un court instant si le token n'est pas disponible
+         //test
          let retries = 3;
          let accessToken = getAccessToken();
 
